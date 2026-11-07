@@ -1,83 +1,36 @@
-# User 3 integration notes
+# Combined application integration
 
-## Current state
+Date: November 7, 2026, America/Toronto. The lead explicitly authorized merging all team branches into `main`. Integration was prepared on `integration/skillreceipt` from the common docs baseline `9360e8a`, with no reset, force push or discarded branch history.
 
-Work is on local branch `feat/coach-quality`, descending from shared docs commit `9360e8a`. The lead confirmed on November 7, 2026 that Users 1 and 2 had not started. Their application baseline, UI, and explicit handoffs are still pending. No broad edits to another owner's files or final merge have occurred.
+## Integrated inputs
 
-## Delivered interfaces
+| Role | Branch | Head included |
+| --- | --- | --- |
+| User 1 | `claude/skillreceipt-work` | `963dc1d` (backend `c9718ea`, origin fix `3179ced`, handoff) |
+| User 2 | `codex/skillreceipt-work` | `2d73d59` (UI `532c7a5`, explicit handoff) |
+| User 3 | `feat/coach-quality` | `0fc6009` (local coach, independent tests and docs) |
 
-`lib/server/coach.ts` exports the required `getPracticeAdvice(evaluation: Evaluation): Promise<{ advice: string; model: string }>` and testable factory functions. It imports only shared types plus the `server-only` boundary. It does not implement an evaluator or storage layer.
+The three branches were merged with separate normal merge commits, preserving authors and history. User 1 and User 2 explicitly handed off. No shared type, endpoint shape, source row, reference amount, grading rule or product boundary was changed during integration.
 
-`POST /api/receipts/[id]/coach` uses User 1's `getRequestReceipt(request, id)` and `assertSameOrigin(request)` through a small endpoint adapter. It awaits Next route params and uses the Node runtime. The shared HTTP contract is unchanged.
+## Integration fixes
 
-The production route requires User 1 to supply `lib/contracts.ts`, `lib/server/auth.ts`, and `lib/server/http.ts`. These are intentionally not mocked or replaced in application source.
+1. **Empty coach requests:** Next can expose a non-null stream for an empty POST. The old non-null check returned 400 for legitimate owner requests. The coach now reads until actual bytes or EOF, accepts empty streams and rejects all nonempty content (including `{}` and custom prompts). It buffers no prompt and has a 1.5-second request-body deadline. Regression tests cover empty and unfinished streams.
+2. **HTTP test request deadlines:** independent cookie clients now attach a 60-second deadline unless a caller supplies one, covering response reads and preventing indefinite test hangs. This changes no assertions, scoring or app authorization. The normal `npm run test:e2e` command now passes without a diagnostic preload.
+3. **Coach UI deadline:** the panel now waits up to 50 seconds, beyond the server's 45-second model limit. Deterministic feedback stays visible throughout.
+4. **Documentation:** replaced preparatory-only setup/status with actual integrated commands/outcomes, preserving prior role handoffs as historical records. The original role handoffs describe their respective branches at delivery; this file and VALIDATION.md describe the combined app.
 
-## Request to User 1
+## Preserved behavior
 
-- Supply the documented shared modules and compatible Next/TypeScript configuration, including the `server-only` package/boundary.
-- Add agreed scripts to `package.json` and its lockfile. User 3 added no packages and did not create configuration or a substitute app.
-- Coach unit tests use built-in `node:test` and work on the observed Node 22.14.0 with the command below. If the team's primary runner is Vitest, exclude these node:test files from Vitest discovery and provide a separate script, or coordinate an explicit runner migration. Do not run node:test cases as Vitest suites.
-- Decide the storage-directory environment variable together. The HTTP helper proposes `SKILLRECEIPT_DATA_DIR`; if the baseline uses another name, pass its name as `SKILLRECEIPT_TEST_DATA_ENV` to the test process. No storage variable has been added to application configuration by User 3.
-- Ensure the store resolves default paths from the running server's working directory, not an absolute developer directory. The HTTP harness copies the production build into a temporary working directory and does not copy `.env.local`.
-- Agree exact field/total length bounds and complete the master-required evaluator/storage/validation unit tests. Independent HTTP fixtures use the master's suggested ID/date/region/revenue bounds (40/60/60/40).
+The server remains authoritative for all six deterministic checks. Exact decimal-to-cents comparisons, nine valid IDs and the 128550-cent reference are unchanged. The owner cookie is HttpOnly, SameSite=Lax, path=/, 30 days, Secure on HTTPS. The store hashes owner tokens, atomically writes per-receipt files, serializes same-process operations and exposes only safe declared shapes.
 
-## Request to User 2
+Sharing is private by default, explicitly enabled, revocable, and re-enabled with a new token. Public HTML is resolved on the server without an owner cookie, with no-store/noindex/nofollow. Downloads contain actual artifact rows/safe evidence, no owner/private ID/share capability or advice. Model text never grades, mutates, persists in, or becomes part of a receipt.
 
-Call the coach with **no body**:
+The coach uses loopback-only server configuration and fixed descriptions/pass-fail flags, selecting up to three approved exercises. Unknown, duplicated, irrelevant, malformed or markup selections return safe 503. Per-process limits remain one pending request per receipt, 30-second cooldown after completion/failure, two global generations and 256 bounded cooldown entries. No cloud fallback or model downloads.
 
-```ts
-const response = await fetch(`/api/receipts/${id}/coach`, {
-  method: 'POST',
-  credentials: 'same-origin',
-});
-```
+## Validation and limits
 
-Do not send `{}`, an artifact, a score, or a custom prompt. Owner authorization returns 404 when unavailable; origin errors return 400; cooldown/global bounds return 429 with `Retry-After`; model errors return 503; unexpected authorization/storage errors return a safe 500. Every response uses private/no-store.
+Run `npm ci`, `npm run typecheck`, `npm test`, `npm run build`, `npm run test:e2e`. All passed on the combined source: 55 unit cases and all ten nested HTTP scenarios. A separate real local-model HTTP smoke returned 200 and left the complete receipt unchanged. See [VALIDATION.md](VALIDATION.md) for precise evidence.
 
-Success is exactly `{ advice, model, assessed: false }`. Render `advice` as text with preserved line breaks. Use the master label “AI-generated practice advice · not assessed,” loading/error/live-region states, and a 30-second retry explanation. Keep deterministic check feedback visible before/after any coach request. Do not persist advice or include it in public evidence/exports.
+Desktop landing/assessment views loaded in Brave and the landing screenshot was inspected. Further browser actions were interrupted by unstable native control; full interactive/mobile QA remains a recorded gap. This merge does not establish public deployment, production readiness, broad skills certification, identity/authorship verification or hiring suitability.
 
-The model chooses up to three approved exercises for failed checks; all-pass receipts can only receive a fresh-exercise suggestion. The server returns approved wording, never arbitrary model instructions. This design was chosen after real model testing produced incorrect free-form advice. It leaves the frontend/API contract unchanged.
-
-## Local coach behavior
-
-- Server-only `OLLAMA_BASE_URL` defaults to `http://127.0.0.1:11434`; `OLLAMA_MODEL` defaults to existing `llama3.2:latest`.
-- Only loopback URLs are accepted; credentials, query strings, extra paths, and redirects are rejected. There is no cloud fallback or model download.
-- Prompt data comes from fixed assessment/rule/exercise descriptions and boolean flags. Submitted values, observations, labels, names, reflections, receipt IDs, session/share tokens, and files are excluded.
-- Generation uses a structured JSON schema containing only allowed exercise identifiers. Unknown, duplicate, markup, or irrelevant selections fail safely. Approved plain-text advice is transient.
-- Deadline: 45 seconds covering fetch and body reads; output envelope: 32,768 actual streamed bytes; at most three approved exercises; generation budget: 80 tokens.
-- Per-process policy: one pending request per receipt, 30-second cooldown after completion or failure, two global in-flight generations, at most 256 cooldown entries with expired entries removed.
-- Rate state resets on server restart and is not a distributed rate limiter. Existing master single-process/local-persistence limits still apply.
-
-## Commands
-
-Run now, without npm dependencies or a model:
-
-```bash
-node --experimental-strip-types --import ./tests/helpers/register-typescript.mjs --test tests/unit/coach.test.ts
-```
-
-The test-only loader strips TypeScript via Node, resolves extensionless local imports, and substitutes an empty `server-only` marker only inside that explicit test process. It does not supply missing contracts, auth, storage, Next, scoring, or UI. Type stripping is **not** typechecking. Never load this test helper into the application or use it to bypass a Next production build.
-
-Optional explicit real-model smoke (not part of automated unit tests):
-
-```bash
-node --experimental-strip-types --import ./tests/helpers/register-typescript.mjs ./tests/helpers/coach-smoke.ts
-```
-
-After the baseline and UI are combined and a production build exists:
-
-```bash
-npm ci
-npm run typecheck
-npm test
-npm run build
-node --experimental-strip-types --import ./tests/helpers/register-typescript.mjs --test tests/integration/receipts.test.ts
-```
-
-User 1 should provide the final `npm run test:e2e` equivalent for the last command. The harness starts/stops a real Next production server, creates independent cookie jars, uses temporary storage/working directories and a local mock Ollama listener, restarts the server on the same directory to check persistence, then cleans up. It does not target an existing app URL or actual user receipts. It needs permission to bind loopback listeners and reach them.
-
-Its build/config copying assumes the baseline's production config is self-contained. Adjust only this owned helper after inspecting User 1's actual configuration if it needs extra non-secret local files. Never copy a real `.env.local` or runtime receipt directory to make tests pass.
-
-## Final integration gate
-
-Wait for explicit User 1 and User 2 handoffs and verify their common baseline. Then preserve all commits on a clean `integration/skillreceipt` branch, apply minimum coordinated fixes, and run the full checks plus [browser acceptance](../tests/browser/README.md). Record exact outcomes in [VALIDATION.md](VALIDATION.md) and complete [the User 3 handoff](handoffs/USER_3.md). Final app integration is not complete on this preparatory branch.
+Local startup is `npm ci` then `npm run dev`, normally http://localhost:3000. Runtime storage defaults to `.data/` and can be overridden with `SKILLRECEIPT_DATA_DIR`; it is one-process local persistence, not a distributed/cloud store. Final demo instructions are in [DEMO.md](DEMO.md).

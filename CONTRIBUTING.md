@@ -15,7 +15,7 @@ git pull --ff-only origin main
 
 For an existing checkout, preserve uncommitted work before switching branches. Do not reset, clean, or overwrite another developer's changes.
 
-User 1 publishes the runnable baseline first. Users 2 and 3 can prepare their owned documentation, fixtures, or adapter design while waiting, but should branch implementation work from that baseline. Example branch names:
+The three role branches have been combined into the runnable baseline. Start new feature work from the latest `main`; preserve existing feature branches and their history. Role branch examples:
 
 - User 1: `feat/core-baseline`
 - User 2: `feat/ui`
@@ -37,7 +37,7 @@ If a branch already exists, switch to it instead of creating a replacement. If y
 - Inspect `git status` and `git diff --cached` before committing. Stage the specific intended paths.
 - Never commit `.env.local`, credentials, `.data/`, `node_modules/`, `.next/`, test reports, or local receipts.
 - When the team lead authorizes publishing your work, push your feature branch and open a pull request targeting `main`. Never force-push shared history.
-- This setup request authorizes the initial shared documentation upload; future implementation publication follows the team lead's instructions.
+- Publication and integration follow the team lead's instructions; the current combined release was explicitly authorized.
 
 Include the problem solved, affected contracts, actual validation results, and remaining gaps in your PR. The PR template is a reminder, not evidence that checks ran.
 
@@ -47,6 +47,6 @@ Each owner records their branch and commit, changed files, exported interfaces, 
 
 User 3 begins broad integration edits only after Users 1 and 2 explicitly hand off. Preserve all branches and resolve conflicts against the shared contract. Do not change the rubric to satisfy a test.
 
-## Validation after the baseline exists
+## Validation
 
 Use the scripts provided by the baseline. Required final checks include reproducible `npm ci`, typechecking, unit and HTTP integration tests, production build, and supported browser QA. Integration tests use isolated temporary storage and independent cookie jars. Record unrun checks and failures honestly. Local coaching being unavailable must not break the assessment, receipt, download, or sharing flow.

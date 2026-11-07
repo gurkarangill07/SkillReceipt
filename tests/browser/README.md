@@ -1,8 +1,8 @@
 # Browser acceptance record
 
-Status: **not run**. The current branch has User 3's backend coaching and tests; User 1's runnable baseline and User 2's screens have not arrived. No screenshots or interactive/browser results are claimed.
+Status: **partial integrated desktop inspection on November 7, 2026**. Native Brave loaded the actual production landing and assessment pages. The landing screenshot was visually inspected in chat; assessment accessibility showed the exact source, controls, labels and brief. Browser access was unstable and a manual cell interaction/state refresh was interrupted, so full editing/submission/sharing/coach/keyboard/console/mobile verification remains unrun. No local PNG artifacts are claimed.
 
-Use the available browser-control tools once the combined application runs. Do not install a browser framework or change the lockfile without coordinating with User 1. HTTP tests do not count as browser verification.
+HTTP acceptance passes on the combined app, but HTTP is not browser verification. User 2's separate fixture-browser results also do not count as integrated interactive acceptance. Complete the checklist below when stable browser access is available. No browser framework was installed for this merge.
 
 ## Interaction checklist for the integrated app
 

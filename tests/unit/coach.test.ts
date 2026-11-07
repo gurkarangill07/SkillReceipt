@@ -215,6 +215,33 @@ test("endpoint rejects custom prompts, forged scores, and all bodies", async () 
   assert.equal(harness.calls(), 0);
 });
 
+test("endpoint accepts Next-style empty POST streams without accepting nonempty content", async () => {
+  const harness = endpointHarness();
+  const stream = new ReadableStream<Uint8Array>({ start(controller) {
+    controller.enqueue(new Uint8Array(0)); controller.close();
+  } });
+  const empty = new Request("http://localhost:3000/api/receipts/id/coach", {
+    method: "POST", headers: { origin: "http://localhost:3000", cookie: "test-owner=allowed" },
+    body: stream, duplex: "half",
+  } as RequestInit);
+  assert.notEqual(empty.body, null);
+  assert.equal((await harness.endpoint(empty, "stream-id")).status, 200);
+  assert.equal(harness.calls(), 1);
+});
+
+test("an unfinished coaching request body is bounded and cannot trigger a model call", async () => {
+  const harness = endpointHarness();
+  let cancelled = false;
+  const stream = new ReadableStream({ cancel() { cancelled = true; } });
+  const stalled = new Request("http://localhost:3000/api/receipts/id/coach", {
+    method: "POST", headers: { origin: "http://localhost:3000", cookie: "test-owner=allowed" },
+    body: stream, duplex: "half",
+  } as RequestInit);
+  assert.equal((await harness.endpoint(stalled, "stream-id")).status, 400);
+  assert.equal(cancelled, true);
+  assert.equal(harness.calls(), 0);
+});
+
 test("endpoint returns transient advice, no secret fields, and private/no-store", async () => {
   const harness = endpointHarness();
   const before = structuredClone(harness.receipt);

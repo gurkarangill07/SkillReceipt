@@ -200,6 +200,29 @@ export function createPracticeCoach(options: CoachOptions = {}) {
 
 export const getPracticeAdvice: (evaluation: Evaluation) => Promise<Advice> = createPracticeCoach();
 
+async function hasRequestBody(request: Request): Promise<boolean> {
+  if (!request.body) return false;
+  const reader = request.body.getReader();
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    const deadline = new Promise<never>((_, reject) => {
+      timer = setTimeout(() => reject(new Error("Request body did not finish.")), 1_500);
+    });
+    const read = async () => {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) return false;
+        if (value.byteLength > 0) return true;
+      }
+    };
+    return await Promise.race([read(), deadline]);
+  } finally {
+    if (timer !== undefined) clearTimeout(timer);
+    void reader.cancel().catch(() => {});
+    reader.releaseLock();
+  }
+}
+
 type EndpointDependencies<TRequest extends Request> = {
   assertSameOrigin: (request: TRequest) => void;
   getRequestReceipt: (request: TRequest, id: string) => Promise<OwnerReceipt | null>;
@@ -228,9 +251,12 @@ export function createCoachEndpoint<TRequest extends Request>(dependencies: Endp
     try {
       const receipt = await dependencies.getRequestReceipt(request, id);
       if (!receipt) return reply({ error: "Receipt unavailable." }, 404);
-      // No client input is needed or trusted. Reject even an empty JSON object.
-      if (request.body !== null) {
-        void request.body.cancel().catch(() => {});
+      // Next can expose an empty stream for a bodyless POST. Inspect bytes,
+      // rejecting any content (even {}) without buffering or parsing a prompt.
+      let containsBody: boolean;
+      try { containsBody = await hasRequestBody(request); }
+      catch { return reply({ error: "Practice advice takes no request body or custom prompt." }, 400); }
+      if (containsBody) {
         return reply({ error: "Practice advice takes no request body or custom prompt." }, 400);
       }
       const instant = now();

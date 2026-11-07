@@ -1,10 +1,10 @@
 # SkillReceipt demo script
 
-Status: prepared script, **not rehearsed against the combined application**. UI and the server baseline are pending. Verify all named controls exist before presenting. Local coaching is optional and never a live-demo dependency.
+Status: the combined app builds and all ten HTTP acceptance scenarios pass; desktop landing/assessment were inspected. A full interactive rehearsal remains outstanding because browser control was interrupted. Verify the complete flow manually before presenting. Local coaching is optional and never a live-demo dependency.
 
 ## Before presenting
 
-Follow the integrated README's install/start instructions once available. Use a fresh anonymous browser session and synthetic data only. Confirm the source dataset, 1285.50 CAD reference, expected demo label, sharing/revocation, and a separate reviewer session. A localhost link works only where that server is reachable; no public deployment is implied.
+Follow the integrated README's install/start instructions. Use a fresh anonymous browser session and synthetic data only. Confirm the source dataset, 1285.50 CAD reference, expected demo label, sharing/revocation, and a separate reviewer session. A localhost link works only where that server is reachable; no public deployment is implied.
 
 ## Main flow: approximately 2–3 minutes
 
@@ -27,7 +27,7 @@ Follow the integrated README's install/start instructions once available. Use a 
 4. Expected result from the published rubric: **80/100, five checks passed; date normalization/fidelity fails**. The tier may still be “Strong evidence on this task”; explain that the total never overrides the visible individual failure.
 5. Inspect the date observation and submitted row. This proves format alone is insufficient and the evaluator does not simply award 100 for every valid envelope.
 
-These are expected values from the master, not an assertion that the unbuilt application has passed this demo.
+These expected imperfect-attempt values passed through the real HTTP API. The complete interactive presentation still needs a manual rehearsal.
 
 ## Coach unavailable
 

@@ -14,7 +14,9 @@ export class CookieClient {
     if (init.method && !["GET", "HEAD"].includes(init.method.toUpperCase()) && !headers.has("Origin")) {
       headers.set("Origin", this.origin);
     }
-    const response = await fetch(new URL(path, this.origin), { ...init, headers, redirect: "manual" });
+    const response = await fetch(new URL(path, this.origin), {
+      ...init, headers, redirect: "manual", signal: init.signal ?? AbortSignal.timeout(60_000),
+    });
     for (const cookie of response.headers.getSetCookie()) {
       const pair = cookie.split(";", 1)[0];
       const split = pair.indexOf("=");

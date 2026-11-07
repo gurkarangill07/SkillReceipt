@@ -2,7 +2,7 @@
 
 ## Current shared state
 
-This initial commit supplies documentation and ignore rules. The runnable application baseline is still pending. The team lead is User 3. All three human developers use their own Codex sessions and clones; do not launch additional agents/workers.
+The backend, frontend and local coach are integrated. Start new work from the latest `main`; actual results and remaining browser QA gaps are in [VALIDATION.md](VALIDATION.md). The team lead is User 3. All three human developers use their own Codex sessions and clones; do not launch additional agents/workers.
 
 ## Ownership during parallel work
 
@@ -15,6 +15,8 @@ This initial commit supplies documentation and ignore rules. The runnable applic
 This table summarizes the supplied master and User 3 assignment; Users 1 and 2 must also follow their complete assignments from the lead. It does not replace missing role prompts. User 1 is the canonical owner of the shared implementation; [SHARED_CONTRACT.md](SHARED_CONTRACT.md) specifies signatures, not permission for other roles to implement substitutes.
 
 ## Startup sequence
+
+The initial sequence below has been completed for this delivery; User 1 and User 2 explicitly handed off before final integration. Use the integrated README to run the app rather than waiting for another baseline.
 
 1. Everyone reads the master, shared contract, and their assignment.
 2. User 1 prepares the compatible Next.js/TypeScript/npm baseline, shared types/data/helpers and agreed scripts on the shared history. Coordinate a minimal UI shell with User 2 if required to make the baseline runnable.
@@ -49,4 +51,4 @@ Each owner creates their own handoff file when ready, containing:
 - Open issues, limitations, and dependencies on another owner.
 - An explicit statement that editing has stopped and the branch is handed off.
 
-No handoff is assumed from the presence of this guide. No tests or app features are implemented by this documentation commit.
+Future handoffs still require explicit owner communication. Historical role handoffs are preserved under `docs/handoffs/`; the User 3 combined handoff describes the integrated delivery.

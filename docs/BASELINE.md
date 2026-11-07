@@ -1,3 +1,5 @@
+> Historical User 1 baseline notes. The final combined app is now described in [README.md](../README.md), [INTEGRATION.md](INTEGRATION.md) and [VALIDATION.md](VALIDATION.md). The coach empty-body and HTTP request-deadline issues below were resolved during integration.
+
 # User 1 backend baseline
 
 This branch, `claude/skillreceipt-work`, supplies the shared configuration, assessment, evaluator, server repository/ownership/query helpers, and all APIs except coaching. User 2 owns the UI; User 3 owns coaching and independent acceptance. No frontend or coach code from those branches is included here. The existing README is the original shared starter document; use this file for the new backend setup.

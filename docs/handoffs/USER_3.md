@@ -1,36 +1,32 @@
-# User 3 preparatory delivery
+# User 3 combined integration handoff
 
-Date: November 7, 2026. Branch: `feat/coach-quality`. Shared ancestor: `9360e8a` (`docs: add shared specification and team onboarding`).
+Date: November 7, 2026. The lead explicitly authorized publishing and merging all team branches into `main`. Work was combined on `integration/skillreceipt` from common baseline `9360e8a`.
 
-## Status
+## Integrated histories
 
-User 3's owned coaching implementation, independent test suite, and draft documentation are prepared. This is **not the final combined application handoff**. The lead confirmed Users 1 and 2 had not started; neither has handed off. No other feature branches have been integrated and no production app/build/browser pass is claimed.
+- User 1: `claude/skillreceipt-work` at `963dc1d` (core `c9718ea`, origin fix `3179ced`, explicit handoff).
+- User 2: `codex/skillreceipt-work` at `2d73d59` (frontend `532c7a5`, explicit handoff and stopped editing).
+- User 3: `feat/coach-quality` at `0fc6009` (local coach, independent tests and preparatory docs).
+- Separate normal merge commits preserved all source histories: `d15b13b` (User 1), `d0fd8f4` (User 2), `4b57e8e` (User 3).
 
-The implementation is kept local until the lead requests publication. The delivery commit can be identified with:
+The final integration commit(s) follow those merges and can be identified by `git log --oneline --first-parent main`. Original feature branches were preserved, with no reset or force push.
 
-```bash
-git log -1 --format='%h %s' feat/coach-quality
-```
+## Integration fixes
 
-## Delivered files
+The coach accepts genuinely empty Next POST streams while rejecting nonempty/custom prompt content, with a 1.5-second body deadline. Added regression tests. HTTP test clients now have bounded request/response deadlines. Coach UI now waits 50 seconds to cover the server's 45-second model deadline. Shared contracts, dataset, rubric, server score and evidence semantics are unchanged. Final README/configuration/demo/validation notes reflect the working combined app.
 
-- `lib/server/coach.ts`: required advice API, injectable local Ollama transport, privacy-safe fixed prompt, approved-exercise selection, bounded timeout/output, and delegated owner/origin endpoint adapter with cooldown/global bounds.
-- `app/api/receipts/[id]/coach/route.ts`: production Next route using the shared auth/http interfaces. No substitute auth/store/scoring modules were created.
-- `.env.example`: safe optional server-only coach configuration.
-- `tests/unit/coach.test.ts`: 25 independent mocked unit checks.
-- `tests/helpers/**`: synthetic fixtures, explicit test-only Node loader, real-model smoke, cookie/CSV assertions and isolated real Next/mock-model server harness with helper type declarations.
-- `tests/integration/receipts.test.ts`: independent HTTP acceptance suite, awaiting the runnable baseline/build.
-- `tests/browser/README.md`: browser acceptance checklist and explicit unrun status.
-- `README.md`, `docs/DEMO.md`, `docs/VALIDATION.md`, `docs/INTEGRATION.md`: current setup, demo, actual results, owner coordination and final integration requirements.
+## Actual results
 
-## Results
+`npm ci`, `npm run typecheck`, `npm test`, `npm run build`, `npm run test:e2e` all passed on integrated source: **55 unit tests**, **10/10 HTTP scenarios** (11 Node tests counting the parent). The HTTP harness uses independent cookie jars, a real production Next process, temporary storage and a mock model; it verifies restart persistence, sharing rotation/revocation, safe exports, authorization, streamed input limits and optional coach independence.
 
-The exact commands and observations are in [VALIDATION.md](../VALIDATION.md): 25 coach unit tests passed; syntax checks passed; the final local `llama3.2:latest` smoke returned two approved practice exercises with unchanged evaluation. The HTTP command exited 1 at the missing-build preflight, before any app assertions or receipt creation.
+A separate real `llama3.2:latest` request through the production owner endpoint returned 200 and approved advice; the complete synthetic demo receipt stayed deeply unchanged. No large model downloads or cloud fallback.
 
-Two real preliminary free-form responses contained rubric mistakes. The final adapter prevents that path by accepting only approved exercise identifiers and returning fixed safe text. No model advice is graded or saved.
+Actual desktop landing/assessment pages were inspected through native Brave. The landing screenshot was viewed in chat. Browser control interrupted further interaction; **full interactive/mobile/keyboard/console QA is still unverified**, not covered by the HTTP pass. No PNG files are claimed. Exact evidence and earlier failures are in [VALIDATION.md](../VALIDATION.md).
 
-## Needed from teammates
+## Startup and boundaries
 
-User 1: shared types/auth/http modules, `server-only`, pinned packages/scripts, evaluator/store/API implementation, and storage/test configuration agreement. User 2: all screens and the text-only coach panel, including deterministic fallback and accessible async states. Detailed requests and frontend contract: [INTEGRATION.md](../INTEGRATION.md).
+Project: `/Users/gg07/UNHACK 2026` on the lead's machine; teammates use their own clone. Run `npm ci` then `npm run dev`, normally http://localhost:3000. For production: `npm run build` then `npm start`. No server or local-data artifacts are required in Git.
 
-After both explicit handoffs: confirm common ancestry, integrate without discarding work, run reproducible installation/typecheck/all tests/build/HTTP/browser checks, verify exclusion of secrets/runtime data/advice from evidence, and replace the preparatory status with the final integrated commits and actual outcomes. A localhost-only prototype is not a public deployment.
+Storage defaults to ignored `.data/`; override server-only `SKILLRECEIPT_DATA_DIR`. Browser ownership is HttpOnly/SameSite with a 30-day cookie, local HTTP support and Secure on HTTPS; losing the cookie loses app access, with no recovery. Sharing remains private until enabled; revoke checks fresh requests and cannot recall copies. Coaching is optional/transient and excluded from evidence. Local links are only reachable where the server is accessible.
+
+Single-process local storage/rate limits, missing integrated mobile/interactive QA and lack of public hosting remain material limits. This app is not a résumé builder or certification/identity/authorship/hiring verification service. See [INTEGRATION.md](../INTEGRATION.md) for the combined contract and [DEMO.md](../DEMO.md) for the presentation.
