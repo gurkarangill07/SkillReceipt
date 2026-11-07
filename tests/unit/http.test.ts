@@ -9,6 +9,8 @@ import { InputError } from "../../lib/validation";
 test("same-origin guard rejects absent, opaque, mismatched and cross-site origins", () => {
   const request = (headers: Record<string, string>) => new NextRequest("http://localhost:3000/api/receipts", { method: "POST", headers });
   assert.doesNotThrow(() => assertSameOrigin(request({ Origin: "http://localhost:3000", "Sec-Fetch-Site": "same-origin" })));
+  assert.doesNotThrow(() => assertSameOrigin(request({ Origin: "http://127.0.0.1:3100", Host: "127.0.0.1:3100" })));
+  assert.throws(() => assertSameOrigin(request({ Origin: "https://evil.invalid", "X-Forwarded-Host": "evil.invalid" })), InputError);
   const rejected: Record<string, string>[] = [{}, { Origin: "null" }, { Origin: "https://evil.invalid" }, { Origin: "http://localhost:3000/path" }, { Origin: "http://localhost:3000", "Sec-Fetch-Site": "cross-site" }];
   for (const headers of rejected) assert.throws(() => assertSameOrigin(request(headers)), InputError);
 });

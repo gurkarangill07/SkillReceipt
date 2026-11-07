@@ -18,6 +18,9 @@ export function assertSameOrigin(request: NextRequest): void {
   if (!origin || origin === "null") throw new InputError("This action must come from the same origin.");
   try {
     const supplied = new URL(origin);
-    if (supplied.origin !== origin || origin !== request.nextUrl.origin) throw new Error();
+    // Next can normalize the internal URL hostname to localhost. Compare the
+    // browser Origin with the incoming Host, never a client-supplied forwarded host.
+    const expected = new URL(`${request.nextUrl.protocol}//${request.headers.get("host") ?? request.nextUrl.host}`);
+    if (supplied.origin !== origin || origin !== expected.origin) throw new Error();
   } catch { throw new InputError("This action must come from the same origin."); }
 }
