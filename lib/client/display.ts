@@ -7,6 +7,12 @@ export function formatTimestamp(value: string): string {
 }
 
 export const narrowEvidence: Record<CheckId, string> = {
+  key: "The submitted design uses a stable order ID as its business key.",
+  dedupe: "The submitted design keeps the newest update for each order.",
+  missing: "The design quarantines unknown revenue instead of inventing a value or losing the exception.",
+  schema: "The design enforces canonical dates and exact monetary values.",
+  load: "The submitted load strategy supports retrying the same batch without appending duplicates.",
+  partition: "The submitted design partitions reporting data by business event date.",
   unique: "The submitted output has nonempty, unique IDs from the valid reference set. This check alone does not establish completeness.",
   dates: "All nine reference orders are represented and every submitted date matches its canonical reference date.",
   regions: "All nine reference orders are represented and every submitted region matches its canonical reference region.",
@@ -16,6 +22,12 @@ export const narrowEvidence: Record<CheckId, string> = {
 };
 
 export const practiceFeedback: Record<CheckId, string> = {
+  key: "Practice choosing stable business keys that survive file reordering.",
+  dedupe: "Rank updates within each order and retain the latest timestamp.",
+  missing: "Write a quarantine output with the rejected row and a reason.",
+  schema: "Test malformed dates and monetary values against an explicit schema.",
+  load: "Replay the same batch twice and assert the reporting table is unchanged.",
+  partition: "Compare event time with arrival time using a late-arriving order.",
   unique: "Review order IDs against the source. Keep valid orders once and remove extra copies of R004 and R009.",
   dates: "Preserve each order's actual date and rewrite it as YYYY-MM-DD. Slash dates in the source mean month/day/year.",
   regions: "Map each source region to Ontario, Quebec, or British Columbia, preserving the region for each order.",

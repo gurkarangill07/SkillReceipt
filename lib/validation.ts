@@ -1,4 +1,5 @@
-import type { DataRow, Submission } from "./contracts";
+import type { DataRow, PipelineWork, SessionContext, Submission } from "./contracts";
+import { PIPELINE_TASKS } from "./career";
 
 export class InputError extends Error {}
 export const MAX_BODY_BYTES = 65_536;
@@ -12,6 +13,27 @@ const text = (value: unknown, label: string, max: number, nonempty = false): str
 
 export function parseSubmission(value: unknown): Submission {
   if (!isRecord(value)) throw new InputError("Submit a JSON object containing rows and a CAD total.");
+  if (value.workSample !== undefined) {
+    const work = value.workSample;
+    if (!isRecord(work) || work.kind !== "data-pipeline-v1" || !isRecord(work.answers) || !isRecord(work.session)) throw new InputError("Provide a supported work sample and session context.");
+    const answers = {} as PipelineWork["answers"];
+    for (const task of PIPELINE_TASKS) {
+      const answer = work.answers[task.id];
+      if (typeof answer !== "string" || !task.options.some((option) => option.value === answer)) throw new InputError(`Choose an answer for ${task.label}.`);
+      answers[task.id] = answer;
+    }
+    const session = work.session;
+    if (!["camera", "practice", "presentation"].includes(String(session.mode)) || typeof session.cameraStarted !== "boolean") throw new InputError("Choose a supported session mode.");
+    const count = (key: string) => {
+      const number = session[key];
+      if (typeof number !== "number" || !Number.isInteger(number) || number < 0 || number > 86_400) throw new InputError("Session counts must be bounded nonnegative integers.");
+      return number;
+    };
+    if (session.mode === "camera" && !session.cameraStarted) throw new InputError("A camera-mode session must report that its camera started.");
+    const context: SessionContext = { mode: session.mode as SessionContext["mode"], cameraStarted: session.cameraStarted, tabSwitches: count("tabSwitches"), interruptions: count("interruptions"), activeSeconds: count("activeSeconds") };
+    if (value.demo !== undefined && typeof value.demo !== "boolean") throw new InputError("The demo marker must be a boolean.");
+    return { rows: [], total: "", displayName: value.displayName === undefined ? "" : text(value.displayName, "Display name", 60), reflection: value.reflection === undefined ? "" : text(value.reflection, "Reflection", 1500), demo: value.demo === true || context.mode === "presentation", workSample: { kind: "data-pipeline-v1", answers, session: context } };
+  }
   if (!Array.isArray(value.rows) || value.rows.length < 1 || value.rows.length > 30) {
     throw new InputError("Submit between 1 and 30 rows.");
   }

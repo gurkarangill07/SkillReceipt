@@ -5,7 +5,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: { default: "SkillReceipt — Let your work do the talking", template: "%s | SkillReceipt" },
-  description: "Complete a practical sales-data challenge, inspect transparent checks, and share evidence of your submitted work.",
+  description: "Add your résumé, choose a role, complete a practical work sample, and get a transparent skill score with a plan to improve.",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

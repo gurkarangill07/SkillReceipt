@@ -1,3 +1,5 @@
+> Historical original specification. The lead subsequently requested résumé context, role selection and focused sessions; those additions are specified in [DEMO_V2_SPEC.md](DEMO_V2_SPEC.md). Original sales-assessment semantics remain frozen.
+
 > Shared product specification supplied by the team lead. Machine-specific project paths have been replaced with a portable placeholder; use your own clone. This is a specification, not a claim that features are implemented. The shared interface contract specializes its suggested architecture. The lead separately authorized repository creation and this starter-documentation upload.
 
 # SkillReceipt — shared master prompt for a three-person team

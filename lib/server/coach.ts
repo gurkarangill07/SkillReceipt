@@ -1,6 +1,7 @@
 import "server-only";
 
 import type { CheckId, Evaluation, OwnerReceipt } from "../contracts";
+import { PIPELINE_TASKS } from "../career";
 
 const TIMEOUT_MS = 45_000;
 const MAX_WIRE_BYTES = 32_768;
@@ -14,6 +15,7 @@ const PRIVATE_HEADERS = {
 // Fixed descriptions of the published rules, used only to frame practice advice.
 // Never use model output or these descriptions to calculate a score.
 const PRACTICE_RULES: ReadonlyArray<readonly [CheckId, string]> = [
+  ...PIPELINE_TASKS.map((task) => [task.id, task.why] as const),
   ["unique", "Keep a nonempty output of valid reference order IDs with no repeated IDs."],
   ["dates", "Represent all nine reference IDs, no unknown IDs; preserve each reference date in YYYY-MM-DD form."],
   ["regions", "Represent all nine reference IDs, no unknown IDs; preserve canonical Ontario, Quebec, or British Columbia for each order."],
@@ -23,6 +25,12 @@ const PRACTICE_RULES: ReadonlyArray<readonly [CheckId, string]> = [
 ];
 
 const EXERCISES: Readonly<Record<CheckId | "next", string>> = {
+  key: "Practice identifying a stable business key that survives file reordering.",
+  dedupe: "Practice ranking updates within each order by timestamp and keeping the newest one.",
+  missing: "Create a quarantine output with a clear reason for each missing-value row.",
+  schema: "Write boundary tests for canonical dates, missing amounts and exact decimal precision.",
+  load: "Replay a batch twice and assert the target table has identical keys, count and values.",
+  partition: "Trace a late-arriving event into its business-date partition.",
   unique: "Practice checking a fresh synthetic export for duplicate and unknown order IDs before choosing which rows to retain.",
   dates: "Practice converting month/day/year and named-month dates to YYYY-MM-DD while preserving each order's original date.",
   regions: "Practice mapping spelling and case variants to Ontario, Quebec, or British Columbia without changing the underlying region.",
@@ -33,7 +41,7 @@ const EXERCISES: Readonly<Record<CheckId | "next", string>> = {
 };
 
 function availableExercises(evaluation: Evaluation): Array<CheckId | "next"> {
-  const failed = PRACTICE_RULES.filter(([id]) =>
+  const failed = PRACTICE_RULES.filter(([id]) => evaluation.checks.some((check) => check.id === id) &&
     !evaluation.checks.some((check) => check.id === id && check.passed === true),
   ).map(([id]) => id);
   return failed.length ? failed : ["next"];
@@ -55,14 +63,14 @@ export class CoachUnavailableError extends Error {
 }
 
 export function buildPracticePrompt(evaluation: Evaluation): string {
-  const summaries = PRACTICE_RULES.map(([id, rule]) => ({
+  const summaries = PRACTICE_RULES.filter(([id]) => evaluation.checks.some((check) => check.id === id)).map(([id, rule]) => ({
     id,
     rule,
     passed: evaluation.checks.some((check) => check.id === id && check.passed === true),
   }));
   return [
-    "Assessment: sales-cleaning-v1. Published rubric: deterministic-v1.",
-    "Synthetic sales-data cleanup practice. These flags are final rule-based results.",
+    evaluation.checks.some((check) => check.id === "key") ? "Assessment: orders-pipeline-v1. Published rubric: pipeline-rules-v1." : "Assessment: sales-cleaning-v1. Published rubric: deterministic-v1.",
+    evaluation.checks.some((check) => check.id === "key") ? "Synthetic pipeline-design practice. These flags are final rule-based results." : "Synthetic sales-data cleanup practice. These flags are final rule-based results.",
     "You cannot see the submitted artifact. Select only from the approved exercise identifiers below. Do not write your own exercise text or corrections.",
     JSON.stringify(summaries),
     summaries.every((check) => check.passed)

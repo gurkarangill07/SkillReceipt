@@ -1,4 +1,10 @@
 import type { DataRow } from "./contracts";
+import type { PipelineWork } from "./contracts";
+import { PIPELINE_TASKS } from "./career";
+
+export function pipelineToCsv(work: PipelineWork): string {
+  return [["decision", "submitted_configuration"], ...PIPELINE_TASKS.map((task) => [task.label, work.answers[task.id]])].map((row) => row.map(csvCell).join(",")).join("\r\n") + "\r\n";
+}
 
 export function csvCell(value: string): string {
   // Prefix formulas even when hidden behind leading whitespace/control characters.

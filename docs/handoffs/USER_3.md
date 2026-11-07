@@ -1,3 +1,5 @@
+> Subsequent role-led feature work is on local branch `feat/role-assessment-demo`. See [DEMO_V2_SPEC.md](../DEMO_V2_SPEC.md) and the current [VALIDATION.md](../VALIDATION.md). This handoff below records the earlier main integration.
+
 # User 3 combined integration handoff
 
 Date: November 7, 2026. The lead explicitly authorized publishing and merging all team branches into `main`. Work was combined on `integration/skillreceipt` from common baseline `9360e8a`.

@@ -6,6 +6,7 @@ import path from "node:path";
 import { ASSESSMENT_VERSION, RUBRIC_VERSION } from "../assessment";
 import type { OwnerReceipt, ReceiptEvidence, ReceiptSummary, Submission } from "../contracts";
 import { evaluate } from "../evaluate";
+import { evaluatePipeline, PIPELINE_VERSION, PIPELINE_RUBRIC_VERSION, pipelineVersion } from "../career";
 import { fingerprint } from "../fingerprint";
 import { isRecord, parseSubmission } from "../validation";
 
@@ -55,23 +56,25 @@ export class FileReceiptRepository implements ReceiptRepository {
     const parsed: unknown = JSON.parse(raw);
     if (!isRecord(parsed) || parsed.id !== id || typeof parsed.ownerHash !== "string" || !validToken(parsed.ownerHash) ||
         (parsed.shareToken !== null && (typeof parsed.shareToken !== "string" || !validToken(parsed.shareToken))) ||
-        parsed.assessmentVersion !== ASSESSMENT_VERSION || parsed.rubricVersion !== RUBRIC_VERSION ||
+        ![ASSESSMENT_VERSION, PIPELINE_VERSION].includes(String(parsed.assessmentVersion)) || ![RUBRIC_VERSION, PIPELINE_RUBRIC_VERSION].includes(String(parsed.rubricVersion)) ||
         typeof parsed.createdAt !== "string" || !Number.isFinite(Date.parse(parsed.createdAt)) ||
         typeof parsed.fingerprint !== "string" || !validToken(parsed.fingerprint) || !isRecord(parsed.evaluation)) {
       throw new Error("Stored receipt is invalid.");
     }
     const submission = parseSubmission(parsed.submission);
+    const versions = pipelineVersion(submission) ?? { assessmentVersion: ASSESSMENT_VERSION, rubricVersion: RUBRIC_VERSION };
+    if (parsed.assessmentVersion !== versions.assessmentVersion || parsed.rubricVersion !== versions.rubricVersion) throw new Error("Stored assessment version is inconsistent.");
     // Validate and copy only the declared evaluation shape, never arbitrary disk fields.
     const evaluation = parsed.evaluation;
     if (!Number.isInteger(evaluation.score) || Number(evaluation.score) < 0 || Number(evaluation.score) > 100 ||
         !["Strong evidence on this task", "Developing evidence on this task", "More practice needed on this task"].includes(String(evaluation.tier)) ||
         !Array.isArray(evaluation.checks) || evaluation.checks.length !== 6) throw new Error("Stored evaluation is invalid.");
-    const clean = evaluate(submission);
+    const clean = submission.workSample ? evaluatePipeline(submission.workSample) : evaluate(submission);
     // v1 evaluator is fixed. A corrupt record fails rather than being silently repaired.
     if (JSON.stringify(evaluation) !== JSON.stringify(clean) || parsed.fingerprint !== fingerprint(submission)) throw new Error("Stored evidence is inconsistent.");
     return {
       id, ownerHash: parsed.ownerHash, shareToken: parsed.shareToken as string | null,
-      createdAt: parsed.createdAt, assessmentVersion: ASSESSMENT_VERSION, rubricVersion: RUBRIC_VERSION,
+      createdAt: parsed.createdAt, ...versions,
       submission, evaluation: clean, fingerprint: parsed.fingerprint,
     };
   }
@@ -105,8 +108,8 @@ export class FileReceiptRepository implements ReceiptRepository {
     return withLock(this.directory, async () => {
       const record: StoredReceipt = {
         id: randomUUID(), ownerHash, shareToken: null, createdAt: new Date().toISOString(),
-        assessmentVersion: ASSESSMENT_VERSION, rubricVersion: RUBRIC_VERSION,
-        submission, evaluation: evaluate(submission), fingerprint: fingerprint(submission),
+        ...(pipelineVersion(submission) ?? { assessmentVersion: ASSESSMENT_VERSION, rubricVersion: RUBRIC_VERSION }),
+        submission, evaluation: submission.workSample ? evaluatePipeline(submission.workSample) : evaluate(submission), fingerprint: fingerprint(submission),
       };
       await this.write(record);
       return ownerView(record);
@@ -130,6 +133,7 @@ export class FileReceiptRepository implements ReceiptRepository {
         if (record?.ownerHash === ownerHash) summaries.push({
           id: record.id, createdAt: record.createdAt, score: record.evaluation.score,
           tier: record.evaluation.tier, demo: record.submission.demo, sharingEnabled: record.shareToken !== null,
+          ...(record.submission.workSample ? { assessmentVersion: record.assessmentVersion } : {}),
         });
       }
       return summaries.sort((a, b) => b.createdAt.localeCompare(a.createdAt) || a.id.localeCompare(b.id));

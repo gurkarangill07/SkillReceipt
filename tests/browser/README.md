@@ -1,3 +1,5 @@
+> Revised role-led flow: native Brave verified the résumé sample and role-selection interaction. Full camera/tab-return/keyboard/mobile/device QA remains unverified after browser-control interruption. Current results: [VALIDATION.md](../../docs/VALIDATION.md). The original checklist below applies to the retained Analyst flow.
+
 # Browser acceptance record
 
 Status: **partial integrated desktop inspection on November 7, 2026**. Native Brave loaded the actual production landing and assessment pages. The landing screenshot was visually inspected in chat; assessment accessibility showed the exact source, controls, labels and brief. Browser access was unstable and a manual cell interaction/state refresh was interrupted, so full editing/submission/sharing/coach/keyboard/console/mobile verification remains unrun. No local PNG artifacts are claimed.

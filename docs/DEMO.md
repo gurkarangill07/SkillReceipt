@@ -1,34 +1,15 @@
-# SkillReceipt demo script
+# SkillReceipt: 2–3 minute pitch
 
-Status: the combined app builds and all ten HTTP acceptance scenarios pass; desktop landing/assessment were inspected. A full interactive rehearsal remains outstanding because browser control was interrupted. Verify the complete flow manually before presenting. Local coaching is optional and never a live-demo dependency.
+One sentence: **“A résumé says what you know; SkillReceipt gives someone practical work and evidence they can inspect.”**
 
-## Before presenting
+1. **0:00–0:20 · Your background.** Open `/`, choose **Find my next step**, then **Use a sample résumé**. Point out the sample label, detected keywords and the fact that résumé content never earns points. Real PDF/DOCX/TXT uploads are supported; use synthetic content during the pitch.
+2. **0:20–0:40 · Your role.** Select **Choose my role**, search **Junior Data Engineer**, and open that work sample. There are two supported roles in this prototype, not every job in the market.
+3. **0:40–1:05 · The work.** Show the retailer's repeated orders/correction/missing revenue scenario and the six transparent skill areas. **Set up my session** shows explicit local-camera consent and practice fallback. Explain that the app observes its own tab visibility, not other tabs or browsing history; it cannot guarantee no cheating.
+4. **1:05–1:25 · Reliable presenter shortcut.** From the brief select **Presenter demo · sample attempt**. This is visibly a demo and uses no camera. Show five input rows, three retained rows, one quarantined row and the replay behavior. Optionally return to the decisions to show one real configuration choice. Select **Get my skill score**.
+5. **1:25–1:55 · Your score and next step.** The sample earns **75/100, four of six checks**. Point out schema validation and partitioning gaps, then the concrete private practice plan. “The score is for this work sample. Another attempt lets you show improvement without rewriting this result.” A correct configuration earns 100; no model grades it.
+6. **1:55–2:20 · Employer evidence.** Enable sharing and open the employer view separately. It shows the actual decisions, score, rule evidence and clearly client-reported session conditions. No résumé or camera footage is shared. Revoke and make a fresh request to the old link to show unavailable state.
+7. **2:20–2:40 · Close.** “The result is useful evidence, not a credit rating, professional certification or identity check.” Next validation: ask applicants/reviewers whether the evidence and practice steps help; this is proposed research, not a completed study.
 
-Follow the integrated README's install/start instructions. Use a fresh anonymous browser session and synthetic data only. Confirm the source dataset, 1285.50 CAD reference, expected demo label, sharing/revocation, and a separate reviewer session. A localhost link works only where that server is reachable; no public deployment is implied.
+For the full candidate path, use camera or practice mode and answer each of the six questions. Local physical-camera permission and tab-return behavior need a device rehearsal before a live pitch. Avoid dependence on camera permissions or Ollama during the judging presentation. The deterministic private practice plan works without a model.
 
-## Main flow: approximately 2–3 minutes
-
-| Time | Action and narration |
-| --- | --- |
-| 0:00–0:20 | Landing: “Early-career applicants need a way to show practical work that another person can inspect. SkillReceipt turns one work sample into a transparent evidence receipt.” |
-| 0:20–0:45 | Open the Junior Data Analyst challenge. Show synthetic-data label, month/day/year convention, missing-revenue rule, and all six published checks. “These rules assess the submitted output, not identity or independent authorship.” |
-| 0:45–1:00 | Make one manual cell edit. Remove and restore a duplicate row. Point out retained-row count and CAD total input. |
-| 1:00–1:20 | Select **Load demo solution**. Point out the persistent **demo** label. “This fills the published reference for demonstration; it does not represent independent candidate work.” Submit. |
-| 1:20–1:45 | Inspect the score, six checks, observations, exact artifact, versions, and fingerprint. “A hash identifies this artifact; it is not an identity check, signature, or credential.” Show JSON/CSV downloads briefly. |
-| 1:45–2:15 | Read the sharing disclosure and enable sharing. Open the evidence link in a separate browser session without owner cookies. Show the full read-only result and demo label. |
-| 2:15–2:35 | Return as owner and revoke the link. Make a fresh reviewer request and show unavailable state. Confirm owner receipt remains accessible. “Saved copies cannot be recalled.” |
-| 2:35–3:00 | Optional: request local practice suggestions. “Rules score your work; the local coach selects what to practice. Advice never changes this receipt.” Close with the limits and a proposed next validation step: ask early-career applicants and reviewers whether the evidence page is understandable and useful. This is a proposed study, not completed research. |
-
-## Alternative imperfect attempt
-
-1. Start another attempt and load the demo solution. Preserve the demo label.
-2. Change only R001's date from `2026-10-01` to the well-formatted but incorrect `2026-10-02`.
-3. Keep all other rows and total unchanged; submit.
-4. Expected result from the published rubric: **80/100, five checks passed; date normalization/fidelity fails**. The tier may still be “Strong evidence on this task”; explain that the total never overrides the visible individual failure.
-5. Inspect the date observation and submitted row. This proves format alone is insufficient and the evaluator does not simply award 100 for every valid envelope.
-
-These expected imperfect-attempt values passed through the real HTTP API. The complete interactive presentation still needs a manual rehearsal.
-
-## Coach unavailable
-
-If the coach shows unavailable, use the failed check observations as deterministic next-step feedback and continue. Do not wait repeatedly, download a model, or rely on coaching to issue/share a receipt. Requests have a 45-second upper deadline and a 30-second retry cooldown. Existing successful coaching on this machine is recorded separately in [VALIDATION.md](VALIDATION.md).
+Alternative: the original Analyst assessment remains at `/assessment`. It is a separate, unchanged sales-cleanup test. Do not claim its score and the Engineer score are standardized against each other.

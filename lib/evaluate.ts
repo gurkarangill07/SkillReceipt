@@ -1,5 +1,5 @@
 import { REFERENCE_ROWS, REFERENCE_TOTAL_CENTS, RUBRIC } from "./assessment";
-import type { CheckId, Evaluation, Submission } from "./contracts";
+import type { SalesCheckId, Evaluation, Submission } from "./contracts";
 
 /** At most 999,999,999.99 CAD. Never normalize or coerce assessed values. */
 export function parseCents(value: string): number | null {
@@ -61,7 +61,7 @@ export function evaluate(submission: Submission): Evaluation {
     `Stated total: ${JSON.stringify(submission.total)}${stated === null ? " (invalid canonical money format)" : ` CAD (${stated} cents)`}.`,
     `Computed submitted row sum: ${rowSum === null ? "unavailable because at least one amount is malformed" : money(rowSum)}. Reference total: ${money(REFERENCE_TOTAL_CENTS)}.`,
   ];
-  const results: Record<CheckId, { passed: boolean; observations: string[] }> = {
+  const results: Record<SalesCheckId, { passed: boolean; observations: string[] }> = {
     unique: { passed: unique, observations: uniqueNotes },
     dates: fieldChecks("date"), regions: fieldChecks("region"), revenue: fieldChecks("revenue"),
     integrity: { passed: integrity, observations: integrity ? ["Exactly the nine valid orders appear once each; R008 is absent."] : [...coverageNotes, ...uniqueNotes.filter((note) => note.startsWith("Duplicate")), `Retained rows: ${rows.length}; expected exactly 9 valid orders once each. Missing revenue must not be invented or treated as zero.`] },

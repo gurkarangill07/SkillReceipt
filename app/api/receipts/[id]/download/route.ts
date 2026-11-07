@@ -1,5 +1,5 @@
 import type { NextRequest } from "next/server";
-import { rowsToCsv } from "../../../../../lib/csv";
+import { pipelineToCsv, rowsToCsv } from "../../../../../lib/csv";
 import { getRequestReceipt } from "../../../../../lib/server/auth";
 import { errorResponse, PRIVATE_HEADERS, unavailable } from "../../../../../lib/server/http";
 import { InputError } from "../../../../../lib/validation";
@@ -13,7 +13,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     const format = request.nextUrl.searchParams.get("format");
     if (format !== "csv" && format !== "json") throw new InputError("Choose format=json or format=csv.");
     const { createdAt, assessmentVersion, rubricVersion, submission, evaluation, fingerprint } = receipt;
-    const content = format === "csv" ? rowsToCsv(submission.rows) : JSON.stringify({ createdAt, assessmentVersion, rubricVersion, submission, evaluation, fingerprint }, null, 2);
+    const content = format === "csv" ? (submission.workSample ? pipelineToCsv(submission.workSample) : rowsToCsv(submission.rows)) : JSON.stringify({ createdAt, assessmentVersion, rubricVersion, submission, evaluation, fingerprint }, null, 2);
     return new Response(content, { headers: {
       ...PRIVATE_HEADERS,
       "Content-Type": format === "csv" ? "text/csv; charset=utf-8" : "application/json; charset=utf-8",

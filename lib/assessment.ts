@@ -1,4 +1,4 @@
-import type { CheckId, DataRow } from "./contracts";
+import type { SalesCheckId, DataRow } from "./contracts";
 
 export const ASSESSMENT_VERSION = "sales-cleaning-v1";
 export const RUBRIC_VERSION = "deterministic-v1";
@@ -32,7 +32,7 @@ export const REFERENCE_ROWS = freeze([
   { orderId: "R010", date: "2026-10-10", region: "British Columbia", revenue: "250.00" },
 ]);
 
-export const RUBRIC: readonly { id: CheckId; label: string; rule: string; pointsPossible: number }[] = Object.freeze([
+export const RUBRIC: readonly { id: SalesCheckId; label: string; rule: string; pointsPossible: number }[] = Object.freeze([
   { id: "unique", label: "Unique order IDs", pointsPossible: 20, rule: "Nonempty submission; all IDs belong to the valid reference set and no order ID repeats." },
   { id: "dates", label: "Date normalization and fidelity", pointsPossible: 20, rule: "All nine reference IDs are represented, no unknown IDs, and every submitted date equals its reference in YYYY-MM-DD form." },
   { id: "regions", label: "Region normalization and fidelity", pointsPossible: 20, rule: "All nine reference IDs are represented, no unknown IDs, and every region equals its canonical reference region." },

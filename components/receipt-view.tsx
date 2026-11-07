@@ -1,5 +1,6 @@
 import type { CheckResult, ReceiptEvidence } from "../lib/contracts";
 import { formatTimestamp, narrowEvidence } from "../lib/client/display";
+import { CareerReceipt } from "./career-receipt";
 import { Icon } from "./icon";
 
 function CheckCard({ check, index }: { check: CheckResult; index: number }) {
@@ -8,7 +9,8 @@ function CheckCard({ check, index }: { check: CheckResult; index: number }) {
   return <article className={`check-card ${check.passed ? "check-passed" : "check-failed"}`}><div className="check-card-heading"><span className={`check-symbol ${check.passed ? "pass" : "fail"}`}><Icon name={check.passed ? "check" : "close"} size={16} /></span><div><span className="mono micro muted">CHECK {String(index + 1).padStart(2, "0")} / {check.passed ? "PASSED" : "NOT PASSED"}</span><h3>{check.label}</h3></div><span className="check-points mono">{check.pointsEarned}<span>/{check.pointsPossible}</span></span></div><p className="check-rule"><strong>Rule: </strong>{check.rule}</p><ul className="observations">{visible.map((observation, i) => <li key={i}>{observation}</li>)}</ul>{rest.length > 0 && <details className="more-observations"><summary>Show {rest.length} more {rest.length === 1 ? "observation" : "observations"}</summary><ul className="observations">{rest.map((observation, i) => <li key={i}>{observation}</li>)}</ul></details>}</article>;
 }
 
-export function ReceiptView({ evidence }: { evidence: ReceiptEvidence }) {
+export function ReceiptView({ evidence, privateView = false }: { evidence: ReceiptEvidence; privateView?: boolean }) {
+  if (evidence.submission.workSample) return <CareerReceipt evidence={evidence} privateView={privateView} />;
   const { submission, evaluation } = evidence;
   const passed = evaluation.checks.filter((check) => check.passed);
   return <>

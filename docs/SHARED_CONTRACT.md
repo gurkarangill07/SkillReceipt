@@ -1,3 +1,5 @@
+> The contract below records the original three-role baseline. The lead-approved revision adds an optional `Submission.workSample` for versioned pipeline decisions and client-reported session context, six pipeline check IDs, and an optional assessment version on pipeline summaries. `lib/contracts.ts` is the current canonical source. Legacy submissions retain exactly their original safe shape. See [DEMO_V2_SPEC.md](DEMO_V2_SPEC.md).
+
 # Shared interface contract — identical for all three teammates
 
 
