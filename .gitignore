@@ -1,0 +1,31 @@
+# Dependencies and build output
+node_modules/
+.next/
+out/
+build/
+dist/
+*.tsbuildinfo
+next-env.d.ts
+
+# Local configuration and secrets; only safe examples may be committed
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+.aws/
+
+# Runtime receipts and local state
+.data/
+*.log
+npm-debug.log*
+
+# Test output
+coverage/
+playwright-report/
+test-results/
+
+# Editor and OS files
+.DS_Store
+.vscode/
+.idea/
