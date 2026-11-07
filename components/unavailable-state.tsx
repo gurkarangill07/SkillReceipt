@@ -1,0 +1,6 @@
+import { Icon } from "./icon";
+
+export function UnavailableState({ kind }: { kind: "private" | "shared" | "page" }) {
+  const shared = kind === "shared";
+  return <div className="shell page-shell"><div className="empty-state unavailable-state panel"><span className="round-icon"><Icon name={shared ? "link" : "lock"} size={30} /></span><p className="eyebrow">{shared ? "EVIDENCE LINK UNAVAILABLE" : kind === "private" ? "PRIVATE RECEIPT UNAVAILABLE" : "PAGE UNAVAILABLE"}</p><h1>{shared ? "This evidence link is unavailable." : kind === "private" ? "This receipt isn't available in this session." : "We couldn't find that page."}</h1><p>{shared ? "The link may be incomplete, invalid, or revoked by its owner. Ask the owner for a currently enabled link. Saved copies cannot be recalled." : kind === "private" ? "The receipt may not exist, or this browser may have lost its original anonymous session cookie. A receipt ID alone does not grant access, and this prototype has no account recovery." : "The address may be incomplete or the resource may no longer be available."}</p><div className="button-row"><a className="button button-dark" href="/">Back to home<Icon name="arrow" size={17} /></a>{!shared && <a className="button button-outline" href="/receipts">My receipts</a>}</div></div></div>;
+}
