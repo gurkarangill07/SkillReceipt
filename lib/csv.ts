@@ -1,9 +1,10 @@
 import type { DataRow } from "./contracts";
 import type { PipelineWork } from "./contracts";
-import { PIPELINE_TASKS } from "./career";
+import { PIPELINE_TASKS, SIMPLE_TASKS } from "./career";
 
 export function pipelineToCsv(work: PipelineWork): string {
-  return [["decision", "submitted_configuration"], ...PIPELINE_TASKS.map((task) => [task.label, work.answers[task.id]])].map((row) => row.map(csvCell).join(",")).join("\r\n") + "\r\n";
+  const tasks = work.kind === "data-engineer-v2" ? SIMPLE_TASKS : PIPELINE_TASKS;
+  return [["decision", "submitted_configuration"], ...tasks.map((task) => [task.label, work.answers[task.id] ?? ""]), ...(work.kind === "data-engineer-v2" ? [["JavaScript", work.code ?? ""]] : [])].map((row) => row.map(csvCell).join(",")).join("\r\n") + "\r\n";
 }
 
 export function csvCell(value: string): string {

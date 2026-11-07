@@ -1,3 +1,5 @@
+> Current lead-requested dark portals, accounts, résumé sharing and coding scope: [DARK_PORTALS_SPEC.md](DARK_PORTALS_SPEC.md). The specification below records an earlier version.
+
 # Role-based demo revision
 
 The lead's new request supersedes the original no-résumé-upload/single-role restrictions. Preserve the original sales assessment and receipts; add a concise résumé → role → realistic work sample → score and improvement plan flow. Do not build résumé generation or claim a score measures every professional skill.

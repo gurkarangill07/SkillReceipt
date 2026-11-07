@@ -1,3 +1,5 @@
+> Current lead-requested dark portals, accounts, résumé sharing and coding scope: [DARK_PORTALS_SPEC.md](DARK_PORTALS_SPEC.md). The specification below records an earlier version.
+
 # SkillReceipt interface
 
 User 2 owns the frontend on `codex/skillreceipt-work`. The existing implementation specification and shared contract remain canonical. This work consumes User 1's shared modules and API routes and User 3's coach endpoint; it does not scaffold another application or provide substitute scoring or persistence.

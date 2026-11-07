@@ -7,7 +7,7 @@ import { pipelineVersion } from "./career";
 export function serializeArtifact(submission: Submission): string {
   if (submission.workSample) {
     const { key, dedupe, missing, schema, load, partition } = submission.workSample.answers;
-    return JSON.stringify({ ...pipelineVersion(submission), answers: { key, dedupe, missing, schema, load, partition } });
+    return JSON.stringify({ ...pipelineVersion(submission), answers: submission.workSample.kind === "data-engineer-v2" ? { key, missing, load } : { key, dedupe, missing, schema, load, partition }, ...(submission.workSample.kind === "data-engineer-v2" ? { code: submission.workSample.code } : {}) });
   }
   return JSON.stringify({
     assessmentVersion: ASSESSMENT_VERSION,

@@ -1,9 +1,9 @@
 export type DataRow = { orderId: string; date: string; region: string; revenue: string };
 export type SalesCheckId = "unique" | "dates" | "regions" | "revenue" | "integrity" | "total";
 export type PipelineCheckId = "key" | "dedupe" | "missing" | "schema" | "load" | "partition";
-export type CheckId = SalesCheckId | PipelineCheckId;
+export type CheckId = SalesCheckId | PipelineCheckId | "coding";
 export type SessionContext = { mode: "camera" | "practice" | "presentation"; cameraStarted: boolean; tabSwitches: number; interruptions: number; activeSeconds: number };
-export type PipelineWork = { kind: "data-pipeline-v1"; answers: Record<PipelineCheckId, string>; session: SessionContext };
+export type PipelineWork = { kind: "data-pipeline-v1" | "data-engineer-v2"; answers: Record<"key" | "missing" | "load", string> & Partial<Record<"dedupe" | "schema" | "partition", string>>; session: SessionContext; code?: string };
 export type Submission = { rows: DataRow[]; total: string; displayName: string; reflection: string; demo: boolean; workSample?: PipelineWork };
 export type CheckResult = { id: CheckId; label: string; rule: string; pointsPossible: number; pointsEarned: number; passed: boolean; observations: string[] };
 export type Evaluation = {

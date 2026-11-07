@@ -1,5 +1,6 @@
 import type { NextRequest } from "next/server";
-import { newOwnerToken, OWNER_COOKIE, ownerHashFromRequest, SESSION_SECONDS } from "../../../lib/server/auth";
+import { authorizedOwnerHash, newOwnerToken, OWNER_COOKIE, SESSION_SECONDS } from "../../../lib/server/auth";
+import { ACCOUNT_COOKIE } from "../../../lib/server/accounts";
 import { assertSameOrigin, errorResponse, json } from "../../../lib/server/http";
 import { getRepository, hashOwner } from "../../../lib/server/store";
 import { parseSubmission, readJson } from "../../../lib/validation";
@@ -9,7 +10,7 @@ export const dynamic = "force-dynamic";
 
 export async function GET(request: NextRequest) {
   try {
-    const hash = ownerHashFromRequest(request);
+    const hash = await authorizedOwnerHash(request);
     return json({ receipts: hash ? await getRepository().listOwner(hash) : [] });
   } catch (error) { return errorResponse(error); }
 }
@@ -18,7 +19,8 @@ export async function POST(request: NextRequest) {
   try {
     assertSameOrigin(request);
     const submission = parseSubmission(await readJson(request));
-    const existingHash = ownerHashFromRequest(request);
+    const existingHash = await authorizedOwnerHash(request);
+    if (request.cookies.has(ACCOUNT_COOKIE) && !existingHash) return json({ error: "Sign in as a candidate to submit a work sample." }, 403);
     const token = existingHash ? null : newOwnerToken();
     const receipt = await getRepository().create(submission, existingHash ?? hashOwner(token!));
     const response = json(receipt, 201);

@@ -2,9 +2,9 @@
 
 > A résumé says it. Your work shows it.
 
-A local UNHack prototype with a short, role-focused journey: **add résumé context → choose a job role → complete a practical work sample → inspect your score and practice plan → optionally share evidence**.
+A local UNHack prototype with a short, role-focused journey: **candidate login → upload résumé → search a role → three decisions + a little code → review score and improvement → opt in to employer review**.
 
-The lead's revised product direction is in [DEMO_V2_SPEC.md](docs/DEMO_V2_SPEC.md). It supersedes the original no-upload/single-role restrictions. This is résumé context, not résumé generation or résumé scoring.
+The current product scope is in [DARK_PORTALS_SPEC.md](docs/DARK_PORTALS_SPEC.md). It adds separate candidate/employer portals and supersedes the original no-account/no-upload restrictions. Résumés provide context; they never earn points.
 
 ## Run locally
 
@@ -15,18 +15,18 @@ npm ci
 npm run dev
 ```
 
-Open **http://localhost:3000**, then select **Find my next step**. No API key, cloud database or model is required. For production, run `npm run build` then `npm start`. Windows can use `npm.cmd` if PowerShell blocks npm.ps1.
+Open **http://localhost:3000**, choose **Get started**, and select **Create an account** on the candidate sign-in screen. Employer registration uses **For employers** and a separate account. Passwords require at least ten characters. No API key, cloud database or model is required. For a production build, run `npm run build` then `npm start`. If the host restricts Turbopack’s compiler ports, use `npm run dev -- --webpack` or `npm run build -- --webpack`. Windows can use `npm.cmd` if PowerShell blocks npm.ps1.
 
 ## Two supported work samples
 
-- **Junior Data Engineer:** six pipeline decisions about business keys, latest-update deduplication, quarantine, schema, safe retries and partitioning. A small synthetic simulator makes consequences visible. This checks configuration decisions, not SQL/Python execution, cloud operations or every requirement of the profession.
+- **Junior Data Engineer:** three simple decisions about business keys, missing data and safe retries, followed by a small JavaScript sum function. Four real, published coding tests run in a limited QuickJS WASM VM without host, file or network APIs. This is a starter work sample, not every requirement of the profession.
 - **Junior Data Analyst:** the original sales-cleanup work sample, transparent six-rule evaluator and 1285.50 CAD reference. Its rubric and existing receipts are unchanged.
 
-The role search is a catalog of these supported assessments, not a live job board or a claim that arbitrary roles can already be assessed. The engineering work sample has its own versions (`orders-pipeline-v1`, `pipeline-rules-v1`). Original sales records retain their original versions and exact fingerprint serialization.
+The role search is a catalog of these supported assessments, not a live job board or a claim that arbitrary roles can already be assessed. The new engineering sample uses `engineer-coding-v2` / `engineer-rules-v2`. Existing six-decision `orders-pipeline-v1` / `pipeline-rules-v1` records still open with their original rubric. Original sales records retain their original versions and exact fingerprint serialization.
 
 ## Résumé privacy
 
-Upload a text-based PDF (at most ten pages), DOCX or UTF-8 TXT, up to **2 MB**. The local server reads it in memory and returns recognized skill keywords. Neither the file nor extracted text is persisted, sent to a model, logged by application code or included in employer evidence. Keyword matches are self-reported résumé context, not verified abilities. Scanned/image-only PDFs are not supported. A visibly labeled sample résumé and skip option keep the presentation reliable.
+Upload a text-based PDF (at most ten pages), DOCX or UTF-8 TXT, up to **2 MB**. For signed-in candidates, the local server returns recognized skill keywords and saves the original file privately under ignored `.data/accounts/`. Raw extracted text is not saved or sent to a model. Employers can download the file only when the candidate explicitly enables employer profile access; separate public receipt links do not contain it. The retained guest parsing API returns context without persisting files. Keyword matches are self-reported résumé context, not verified abilities. Scanned/image-only PDFs are not supported. A visibly labeled sample résumé and skip option keep the presentation reliable.
 
 Résumé parsing has bounded file/text/page limits, but this local prototype is not a hardened public document-ingestion service. Production hardening would need isolated parser workers, process/resource limits, rate limiting and further malformed-document review.
 
@@ -38,13 +38,15 @@ Practice mode works without a camera. Presentation mode is always labeled demo. 
 
 ## Score and improvement
 
-The server assigns published deterministic points, not the résumé, a model, speed, camera status or tab counts. The 0–100 number describes one role's work sample; it is not a credit score, general rating, certification or hiring recommendation. The private result shows all six checks and up to three practice steps tied to missed points. The employer view shows the score, decisions, check evidence and honest session context, without the private practice plan or résumé.
+The server assigns published deterministic points, not the résumé, a model, speed, camera status or tab counts. The 0–100 number describes one role's work sample; it is not a credit score, general rating, certification or hiring recommendation. The private result shows the four checks, coding outcomes and practice steps tied to missed points. The employer view shows actual score, submitted work and session context without the private plan or coaching. ID lookup also provides the résumé when profile access is enabled.
 
-The presenter example scores **75/100**: schema and partitioning fail, making the improvement story visible. A correct configuration scores 100. Every new attempt creates a separate immutable receipt; do not compare scores across different assessment versions as an industry benchmark.
+The presenter example scores **80/100**: all three decisions pass; starter code passes two of four cases, earning 20/40 coding points. A correct implementation earns 100. Every new attempt creates a separate immutable receipt; do not compare scores across different assessment versions as an industry benchmark.
 
 ## Evidence, storage and sharing
 
-Results start private. An anonymous HttpOnly, SameSite=Lax cookie provides browser ownership for up to 30 days; Secure is enabled on HTTPS and local HTTP works. Only a hash is stored. Clearing/losing/expiring the cookie loses app access; no account recovery exists.
+Results and candidate profiles start private. Candidate/employer accounts use salted scrypt password hashes and random HttpOnly, SameSite=Lax sessions that expire after seven days; Secure is enabled on HTTPS. Sign-out revokes the account session, and signing in restores results. There is no email verification or password recovery in this local prototype. Original anonymous receipts keep their 30-day browser ownership unless bound to a candidate account; bound receipts require account login. Local account records retain an internal receipt-ownership secret and must be protected with the résumé files.
+
+Enable **Employer profile access** on the dashboard to let any signed-in employer with your Candidate ID see your name, résumé and all results, including demos. Account email, credentials, private IDs and share tokens are excluded; contact details inside a résumé remain in that file. Turn access off to block fresh lookups/downloads. Employers self-register and are not verified organizations. Public receipt links have separate controls.
 
 The local one-file-per-receipt store defaults to ignored `.data/`; override server-only `SKILLRECEIPT_DATA_DIR` if needed. Writes are atomic and same-process updates are serialized. This is one-process local persistence, not ephemeral/serverless or distributed hosting. Capability lookups are linear scans.
 

@@ -1,3 +1,34 @@
+# Dark portals and coding revision: actual validation
+
+Date: November 7, 2026. Local branch `feat/dark-portals-coding`, based on `d9b5662`. Scope: [DARK_PORTALS_SPEC.md](DARK_PORTALS_SPEC.md). This section supersedes earlier status below.
+
+## Checks completed
+
+- `npm ci`: exit 0; pinned installation, zero reported audit findings at that time.
+- `npm run typecheck`: exit 0, including new account and employer API routes.
+- `npm test`: **71 passed**, zero failed/skipped/cancelled.
+- `npm run build -- --webpack`: exit 0; all pages and API routes compiled. Default Turbopack compilation hit the host's local-port restriction (`Operation not permitted`) in its CSS worker. The supported Webpack build succeeds; no application dependency or assertion was removed.
+- `npm run test:e2e`: exit 0 with the normal parallel runner. **19 nested HTTP scenarios passed** across three real production-server suites; Node reports **22 tests** including parents. Temporary directories and independent cookie jars are used.
+- `git diff --check`: clean.
+
+New account checks cover salted password hashes, hashed/expiring/revoked sessions, stable candidate IDs and ownership after login, duplicate/wrong-role rejection, one-account ownership binding, candidate-only uploads, employer-only lookup, private defaults, explicit opt-in and résumé access revocation. HTTP checks additionally exercise same-origin rejection, protected workspaces, forbidden employer submissions, private résumé persistence/download, excluded ownership/account secrets, real restart/login recovery, and denial with revoked account cookies or an old ownership cookie alone.
+
+Coding checks execute the actual QuickJS WASM VM: reference function passes all four cases; starter returns zero and passes two; malformed code, wrong return types, unavailable host/network APIs, infinite loops and memory growth fail within limits. Three correct decisions plus starter code score **80**, a correct implementation scores **100**, and code changes alter the artifact fingerprint. Only the three asked decisions and actual code appear in the new receipt/export; unasked decisions are excluded. New records reopen without re-executing user code. Original pipeline and sales scoring/serialization/share behavior remains covered.
+
+During acceptance, an intermittent timeout appeared in the oversized chunked-upload rejection, including a sequential diagnostic run. The JSON reader now drains a small rejected tail, bounded by 64 KiB and 200 ms, before cancelling the stream and returning the same 400 size-limit error. The accepted JSON limit remains 64 KiB; the rejected tail is never buffered or parsed. Regression tests cover bounded rejection/cancellation and a short finite tail. The unchanged full parallel HTTP assertions then passed; temporary tracing was removed and the test runner was restored.
+
+## Browser observation and limits
+
+Native Brave loaded the isolated production preview on port 3216 using synthetic candidate/employer fixtures and a synthetic résumé. Screenshots were inspected for the dark candidate sign-in and candidate dashboard. Existing-account sign-in succeeded and the dashboard showed the correct candidate ID, résumé controls, 80-point demo record and profile-access state. No default accounts or passwords are shipped in the application. Synthetic preview storage was removed and the owned preview server stopped.
+
+The browser-access host was unavailable. Native control was interrupted by user activity and then timed out during challenge navigation. Full question/code interaction, employer search interaction, keyboard/focus checks, console inspection, 390 px layout and physical camera/visibility/track-stop behavior are **not** claimed as browser-verified. Their API/scoring/authorization paths are covered by the real-server tests. No local screenshot files were created.
+
+A query-navigation issue could leave the wrong login role selected; the role now keys the login form, so navigating between candidate and employer sign-in remounts the correct form. Camera stop/pause is also available outside the desktop-only sidebar. These small UI fixes were typechecked and compiled; further device rehearsal remains appropriate.
+
+This remains a local prototype with self-registered employer accounts, no email verification/password recovery, bounded but in-process document parsing and a limited coding VM. Camera signals cannot establish identity or prevent outside help. No public deployment or automatic remote push is part of this local revision.
+
+---
+
 # Role-led demo revision: actual validation
 
 This section supersedes the previous integrated baseline's status below. The work is on local branch `feat/role-assessment-demo`, based on `254f554`. The lead requested résumé upload, job-role selection, a practical test, session monitoring and a clear score/improvement experience. See [DEMO_V2_SPEC.md](DEMO_V2_SPEC.md) for the revised scope.

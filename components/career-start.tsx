@@ -2,12 +2,13 @@
 
 import { useRef, useState } from "react";
 import Link from "next/link";
+import type { PublicAccount } from "../lib/accounts";
 import { ROLE_CATALOG } from "../lib/career";
 import { Icon } from "./icon";
 
-export function CareerStart() {
+export function CareerStart({ account }: { account?: PublicAccount }) {
   const [step, setStep] = useState(1);
-  const [profile, setProfile] = useState<{ name: string; skills: string[] } | null>(null);
+  const [profile, setProfile] = useState<{ name: string; skills: string[] } | null>(account?.resume ?? null);
   const [query, setQuery] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -31,10 +32,10 @@ export function CareerStart() {
   return <section className="career-flow" aria-labelledby="start-title">
     <ol className="flow-progress" aria-label="Your journey">{["Your background", "Your target role", "Work sample", "Your skill score"].map((label, index) => <li key={label} className={index + 1 <= step ? "current" : ""}><span>{index + 1 < step ? "✓" : index + 1}</span>{label}</li>)}</ol>
     <div className="start-panel panel">
-      {step === 1 ? <><p className="eyebrow">LET’S START WITH YOU</p><h1 id="start-title">Your experience is the starting point.</h1><p className="start-lede">Add your résumé. Then choose the job you want to work toward.</p>
+      {step === 1 ? <><p className="eyebrow">LET’S START WITH YOU</p><h1 id="start-title">Let’s find your next role.</h1><p className="start-lede">Add your résumé, then search for the job you want. One clear step at a time.</p>
         <input ref={input} type="file" className="sr-only" id="resume-upload" accept=".pdf,.docx,.txt" onChange={(event) => upload(event.target.files?.[0])} disabled={busy} />
         <label htmlFor="resume-upload" className={`upload-zone ${busy ? "upload-busy" : ""}`}><span className="upload-symbol"><Icon name={profile ? "check" : "file"} size={30} /></span><strong>{busy ? "Reading your résumé…" : profile ? profile.name : "Choose your résumé"}</strong><span>{profile ? "Choose another file" : "PDF, DOCX or TXT · up to 2 MB"}</span></label>
-        <p className="privacy-line"><Icon name="lock" size={14} />Read in memory on this local app. No file is saved or shared with employers.</p>
+        <p className="privacy-line"><Icon name="lock" size={14} />Saved privately to your candidate profile. Employers can access it only when you enable profile sharing.</p>
         {profile && <div className="resume-context"><span className="micro muted">{sample ? "Illustrative sample résumé" : "Mentioned in your résumé · self-reported"}</span><div className="skill-chips">{profile.skills.length ? profile.skills.map((skill) => <span className="tag" key={skill}>{skill}</span>) : <span className="small">Résumé added. Choose your role next.</span>}</div><p className="micro muted">Your résumé never determines your assessment score.</p></div>}
         {error && <p className="notice notice-error" role="alert">{error}</p>}
         <div className="start-actions"><button className="button button-dark" disabled={busy || !profile} onClick={() => setStep(2)}>Choose my role<Icon name="arrow" size={17} /></button><button className="text-button" disabled={busy} onClick={() => { setProfile({ name: "Sample résumé · for demonstration", skills: ["SQL", "Python", "ETL"] }); setSample(true); setError(""); }}>Use a sample résumé</button></div><button className="skip-resume text-button" disabled={busy} onClick={() => setStep(2)}>Continue without a résumé</button>

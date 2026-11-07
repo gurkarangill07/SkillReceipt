@@ -7,6 +7,7 @@ export function formatTimestamp(value: string): string {
 }
 
 export const narrowEvidence: Record<CheckId, string> = {
+  coding: "The submitted JavaScript produced the expected outputs in all four published examples.",
   key: "The submitted design uses a stable order ID as its business key.",
   dedupe: "The submitted design keeps the newest update for each order.",
   missing: "The design quarantines unknown revenue instead of inventing a value or losing the exception.",
@@ -22,6 +23,7 @@ export const narrowEvidence: Record<CheckId, string> = {
 };
 
 export const practiceFeedback: Record<CheckId, string> = {
+  coding: "Loop over the orders, skip null amounts, and add valid revenueCents values to a running total.",
   key: "Practice choosing stable business keys that survive file reordering.",
   dedupe: "Rank updates within each order and retain the latest timestamp.",
   missing: "Write a quarantine output with the rejected row and a reason.",

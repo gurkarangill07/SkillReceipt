@@ -6,7 +6,8 @@ import path from "node:path";
 import { ASSESSMENT_VERSION, RUBRIC_VERSION } from "../assessment";
 import type { OwnerReceipt, ReceiptEvidence, ReceiptSummary, Submission } from "../contracts";
 import { evaluate } from "../evaluate";
-import { evaluatePipeline, PIPELINE_VERSION, PIPELINE_RUBRIC_VERSION, pipelineVersion } from "../career";
+import { CODING_VERSION, CODING_RUBRIC_VERSION, evaluateEngineer, evaluatePipeline, PIPELINE_VERSION, PIPELINE_RUBRIC_VERSION, pipelineVersion } from "../career";
+import { runCoding, storedCodingEvaluation } from "./coding";
 import { fingerprint } from "../fingerprint";
 import { isRecord, parseSubmission } from "../validation";
 
@@ -56,7 +57,7 @@ export class FileReceiptRepository implements ReceiptRepository {
     const parsed: unknown = JSON.parse(raw);
     if (!isRecord(parsed) || parsed.id !== id || typeof parsed.ownerHash !== "string" || !validToken(parsed.ownerHash) ||
         (parsed.shareToken !== null && (typeof parsed.shareToken !== "string" || !validToken(parsed.shareToken))) ||
-        ![ASSESSMENT_VERSION, PIPELINE_VERSION].includes(String(parsed.assessmentVersion)) || ![RUBRIC_VERSION, PIPELINE_RUBRIC_VERSION].includes(String(parsed.rubricVersion)) ||
+        ![ASSESSMENT_VERSION, PIPELINE_VERSION, CODING_VERSION].includes(String(parsed.assessmentVersion)) || ![RUBRIC_VERSION, PIPELINE_RUBRIC_VERSION, CODING_RUBRIC_VERSION].includes(String(parsed.rubricVersion)) ||
         typeof parsed.createdAt !== "string" || !Number.isFinite(Date.parse(parsed.createdAt)) ||
         typeof parsed.fingerprint !== "string" || !validToken(parsed.fingerprint) || !isRecord(parsed.evaluation)) {
       throw new Error("Stored receipt is invalid.");
@@ -68,8 +69,8 @@ export class FileReceiptRepository implements ReceiptRepository {
     const evaluation = parsed.evaluation;
     if (!Number.isInteger(evaluation.score) || Number(evaluation.score) < 0 || Number(evaluation.score) > 100 ||
         !["Strong evidence on this task", "Developing evidence on this task", "More practice needed on this task"].includes(String(evaluation.tier)) ||
-        !Array.isArray(evaluation.checks) || evaluation.checks.length !== 6) throw new Error("Stored evaluation is invalid.");
-    const clean = submission.workSample ? evaluatePipeline(submission.workSample) : evaluate(submission);
+        !Array.isArray(evaluation.checks) || evaluation.checks.length !== (submission.workSample?.kind === "data-engineer-v2" ? 4 : 6)) throw new Error("Stored evaluation is invalid.");
+    const clean = submission.workSample?.kind === "data-engineer-v2" ? storedCodingEvaluation(submission.workSample, evaluation) : submission.workSample ? evaluatePipeline(submission.workSample) : evaluate(submission);
     // v1 evaluator is fixed. A corrupt record fails rather than being silently repaired.
     if (JSON.stringify(evaluation) !== JSON.stringify(clean) || parsed.fingerprint !== fingerprint(submission)) throw new Error("Stored evidence is inconsistent.");
     return {
@@ -109,7 +110,7 @@ export class FileReceiptRepository implements ReceiptRepository {
       const record: StoredReceipt = {
         id: randomUUID(), ownerHash, shareToken: null, createdAt: new Date().toISOString(),
         ...(pipelineVersion(submission) ?? { assessmentVersion: ASSESSMENT_VERSION, rubricVersion: RUBRIC_VERSION }),
-        submission, evaluation: submission.workSample ? evaluatePipeline(submission.workSample) : evaluate(submission), fingerprint: fingerprint(submission),
+        submission, evaluation: submission.workSample?.kind === "data-engineer-v2" ? evaluateEngineer(submission.workSample, await runCoding(submission.workSample.code!)) : submission.workSample ? evaluatePipeline(submission.workSample) : evaluate(submission), fingerprint: fingerprint(submission),
       };
       await this.write(record);
       return ownerView(record);

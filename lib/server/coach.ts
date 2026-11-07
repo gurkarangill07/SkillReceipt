@@ -15,6 +15,7 @@ const PRIVATE_HEADERS = {
 // Fixed descriptions of the published rules, used only to frame practice advice.
 // Never use model output or these descriptions to calculate a score.
 const PRACTICE_RULES: ReadonlyArray<readonly [CheckId, string]> = [
+  ["coding", "Implement a small synchronous JavaScript sum over orders, skipping null revenueCents; handle empty and zero cases."],
   ...PIPELINE_TASKS.map((task) => [task.id, task.why] as const),
   ["unique", "Keep a nonempty output of valid reference order IDs with no repeated IDs."],
   ["dates", "Represent all nine reference IDs, no unknown IDs; preserve each reference date in YYYY-MM-DD form."],
@@ -25,6 +26,7 @@ const PRACTICE_RULES: ReadonlyArray<readonly [CheckId, string]> = [
 ];
 
 const EXERCISES: Readonly<Record<CheckId | "next", string>> = {
+  coding: "Practice a loop with a running total. Test a normal list, an empty list, a null amount and a genuine zero.",
   key: "Practice identifying a stable business key that survives file reordering.",
   dedupe: "Practice ranking updates within each order by timestamp and keeping the newest one.",
   missing: "Create a quarantine output with a clear reason for each missing-value row.",
@@ -69,7 +71,7 @@ export function buildPracticePrompt(evaluation: Evaluation): string {
     passed: evaluation.checks.some((check) => check.id === id && check.passed === true),
   }));
   return [
-    evaluation.checks.some((check) => check.id === "key") ? "Assessment: orders-pipeline-v1. Published rubric: pipeline-rules-v1." : "Assessment: sales-cleaning-v1. Published rubric: deterministic-v1.",
+    evaluation.checks.some((check) => check.id === "coding") ? "Assessment: engineer-coding-v2. Published rubric: engineer-rules-v2." : evaluation.checks.some((check) => check.id === "key") ? "Assessment: orders-pipeline-v1. Published rubric: pipeline-rules-v1." : "Assessment: sales-cleaning-v1. Published rubric: deterministic-v1.",
     evaluation.checks.some((check) => check.id === "key") ? "Synthetic pipeline-design practice. These flags are final rule-based results." : "Synthetic sales-data cleanup practice. These flags are final rule-based results.",
     "You cannot see the submitted artifact. Select only from the approved exercise identifiers below. Do not write your own exercise text or corrections.",
     JSON.stringify(summaries),
@@ -282,7 +284,7 @@ export function createCoachEndpoint<TRequest extends Request>(dependencies: Endp
         const advice = await (dependencies.getPracticeAdvice ?? getPracticeAdvice)(receipt.evaluation);
         return reply({ advice: advice.advice, model: advice.model, assessed: false }, 200);
       } catch {
-        const fallback = receipt.evaluation.checks.length === 6 && receipt.evaluation.checks.every((check) => check.passed)
+        const fallback = receipt.evaluation.checks.length > 0 && receipt.evaluation.checks.every((check) => check.passed)
           ? "Try another synthetic data-cleaning exercise."
           : "Review the failed checks and their observations, then practice those steps on a new attempt.";
         return reply({ error: `Local practice advice is unavailable. ${fallback} Your saved receipt is unchanged.` }, 503);

@@ -29,6 +29,18 @@ test("JSON reader enforces actual streamed bytes without trusting a fake Content
   const request = new Request("http://localhost", { method: "POST", headers: { "Content-Type": "application/json", "Content-Length": "1" }, body, duplex: "half" } as RequestInit);
   await assert.rejects(readJson(request), /64 KiB/); assert.equal(cancelled, true);
 });
+test("oversized upload drains only a bounded tail and still rejects instead of parsing", async () => {
+  let pulled = 0;
+  const body = new ReadableStream({ pull(controller) {
+    pulled++;
+    if (pulled === 1) controller.enqueue(new Uint8Array(65_537));
+    else if (pulled === 2) controller.enqueue(new Uint8Array(1024));
+    else controller.close();
+  } });
+  const request = new Request("http://localhost", { method: "POST", headers: { "Content-Type": "application/json" }, body, duplex: "half" } as RequestInit);
+  await assert.rejects(readJson(request), /64 KiB/);
+  assert.equal(pulled, 3);
+});
 test("JSON reader handles exact cap and rejects malformed JSON, UTF8 and content type", async () => {
   const body = '{"a":"' + "x".repeat(65_528) + '"}'; assert.equal(Buffer.byteLength(body), 65_536);
   assert.ok(await readJson(new Request("http://localhost", { method: "POST", headers: { "Content-Type": "application/json" }, body })));

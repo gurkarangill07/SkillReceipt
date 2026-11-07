@@ -1,3 +1,5 @@
+> Current dark-portal revision: native Brave screenshots verified candidate sign-in and dashboard with synthetic local data. Browser control then timed out before the challenge; full mobile/camera and remaining interaction checks are still unverified. See [VALIDATION.md](../../docs/VALIDATION.md).
+
 > Revised role-led flow: native Brave verified the résumé sample and role-selection interaction. Full camera/tab-return/keyboard/mobile/device QA remains unverified after browser-control interruption. Current results: [VALIDATION.md](../../docs/VALIDATION.md). The original checklist below applies to the retained Analyst flow.
 
 # Browser acceptance record

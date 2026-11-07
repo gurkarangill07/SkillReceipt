@@ -15,9 +15,10 @@ export function parseSubmission(value: unknown): Submission {
   if (!isRecord(value)) throw new InputError("Submit a JSON object containing rows and a CAD total.");
   if (value.workSample !== undefined) {
     const work = value.workSample;
-    if (!isRecord(work) || work.kind !== "data-pipeline-v1" || !isRecord(work.answers) || !isRecord(work.session)) throw new InputError("Provide a supported work sample and session context.");
+    if (!isRecord(work) || !["data-pipeline-v1", "data-engineer-v2"].includes(String(work.kind)) || !isRecord(work.answers) || !isRecord(work.session)) throw new InputError("Provide a supported work sample and session context.");
     const answers = {} as PipelineWork["answers"];
     for (const task of PIPELINE_TASKS) {
+      if (work.kind === "data-engineer-v2" && !["key", "missing", "load"].includes(task.id)) continue;
       const answer = work.answers[task.id];
       if (typeof answer !== "string" || !task.options.some((option) => option.value === answer)) throw new InputError(`Choose an answer for ${task.label}.`);
       answers[task.id] = answer;
@@ -32,7 +33,8 @@ export function parseSubmission(value: unknown): Submission {
     if (session.mode === "camera" && !session.cameraStarted) throw new InputError("A camera-mode session must report that its camera started.");
     const context: SessionContext = { mode: session.mode as SessionContext["mode"], cameraStarted: session.cameraStarted, tabSwitches: count("tabSwitches"), interruptions: count("interruptions"), activeSeconds: count("activeSeconds") };
     if (value.demo !== undefined && typeof value.demo !== "boolean") throw new InputError("The demo marker must be a boolean.");
-    return { rows: [], total: "", displayName: value.displayName === undefined ? "" : text(value.displayName, "Display name", 60), reflection: value.reflection === undefined ? "" : text(value.reflection, "Reflection", 1500), demo: value.demo === true || context.mode === "presentation", workSample: { kind: "data-pipeline-v1", answers, session: context } };
+    const code = work.kind === "data-engineer-v2" ? text(work.code, "JavaScript code", 5000, true) : undefined;
+    return { rows: [], total: "", displayName: value.displayName === undefined ? "" : text(value.displayName, "Display name", 60), reflection: value.reflection === undefined ? "" : text(value.reflection, "Reflection", 1500), demo: value.demo === true || context.mode === "presentation", workSample: { kind: work.kind as PipelineWork["kind"], answers, session: context, ...(code !== undefined ? { code } : {}) } };
   }
   if (!Array.isArray(value.rows) || value.rows.length < 1 || value.rows.length > 30) {
     throw new InputError("Submit between 1 and 30 rows.");
@@ -60,6 +62,26 @@ export function parseShare(value: unknown): boolean {
   return value.enabled;
 }
 
+// Finish a small, bounded tail before rejecting a chunked upload. Cancelling the
+// request mid-upload can otherwise race Next's HTTP response and stall the client.
+async function drainRejectedTail(reader: ReadableStreamDefaultReader<Uint8Array>): Promise<void> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    await Promise.race([
+      (async () => {
+        let bytes = 0;
+        while (bytes <= MAX_BODY_BYTES) {
+          const next = await reader.read();
+          if (next.done) return;
+          bytes += next.value.byteLength;
+        }
+      })(),
+      new Promise<void>((resolve) => { timer = setTimeout(resolve, 200); }),
+    ]);
+  } catch { /* Preserve the size-limit error if the sender disconnects. */ }
+  finally { clearTimeout(timer); }
+}
+
 export async function readJson(request: Request): Promise<unknown> {
   if (request.headers.get("content-type")?.split(";", 1)[0].trim().toLowerCase() !== "application/json") {
     throw new InputError("Use Content-Type: application/json.");
@@ -73,7 +95,10 @@ export async function readJson(request: Request): Promise<unknown> {
       const { done, value } = await reader.read();
       if (done) break;
       length += value.byteLength;
-      if (length > MAX_BODY_BYTES) throw new InputError("Request exceeds the 64 KiB limit. Submit fewer or shorter fields.");
+      if (length > MAX_BODY_BYTES) {
+        await drainRejectedTail(reader);
+        throw new InputError("Request exceeds the 64 KiB limit. Submit fewer or shorter fields.");
+      }
       chunks.push(value);
     }
     const bytes = new Uint8Array(length);

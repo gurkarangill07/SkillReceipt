@@ -2,8 +2,10 @@ import type { Evaluation, PipelineCheckId, PipelineWork, Submission } from "./co
 
 export const PIPELINE_VERSION = "orders-pipeline-v1";
 export const PIPELINE_RUBRIC_VERSION = "pipeline-rules-v1";
+export const CODING_VERSION = "engineer-coding-v2";
+export const CODING_RUBRIC_VERSION = "engineer-rules-v2";
 export const ROLE_CATALOG = [
-  { id: "junior-data-engineer", title: "Junior Data Engineer", subtitle: "Build a reliable orders pipeline", duration: "12–15 min", skills: ["Data modeling", "Deduplication", "Data quality", "Schema validation", "Reliable loads", "Partitioning"] },
+  { id: "junior-data-engineer", title: "Junior Data Engineer", subtitle: "Build a reliable orders pipeline", duration: "5–8 min", skills: ["Business keys", "Data quality", "Reliable loads", "JavaScript basics"] },
   { id: "junior-data-analyst", title: "Junior Data Analyst", subtitle: "Clean and reconcile a sales report", duration: "15–20 min", skills: ["Data cleaning", "Date normalization", "Revenue reconciliation"] },
 ] as const;
 
@@ -16,8 +18,26 @@ export const PIPELINE_TASKS: readonly { id: PipelineCheckId; label: string; ques
   { id: "partition", label: "Partition strategy", question: "Reports filter by the date the order happened. How should data be partitioned?", why: "Late-arriving October orders still belong to October’s reporting period.", points: 10, correct: "order_date", options: [{ value: "order_date", label: "Order date", detail: "Group by the business event date" }, { value: "ingestion_date", label: "File arrival date", detail: "Group by when the pipeline received it" }, { value: "customer", label: "Customer name", detail: "Create a separate partition for each customer" }], practice: "Compare event date and arrival date for a late order. Explain which partitions an October report needs to read." },
 ];
 
+export const SIMPLE_TASKS = PIPELINE_TASKS.filter((task) => ["key", "missing", "load"].includes(task.id)).map((task) => ({ ...task,
+  points: 20,
+  question: task.id === "key" ? "Which field identifies one order?" : task.id === "missing" ? "An order has no amount. What should happen?" : "The same file runs twice. How do you avoid duplicates?",
+  why: task.id === "key" ? "An order should keep the same identity when it appears in another file." : task.id === "missing" ? "An unknown amount is different from a genuine zero." : "Retrying a job should not count the same order twice.",
+}));
+
+export function evaluateEngineer(work: PipelineWork, run: { passed: number; tests: { label: string; passed: boolean }[] }): Evaluation {
+  const checks: Evaluation["checks"] = SIMPLE_TASKS.map((task) => {
+    const passed = work.answers[task.id] === task.correct;
+    return { id: task.id, label: task.label, rule: task.why, passed, pointsPossible: 20, pointsEarned: passed ? 20 : 0,
+      observations: [`Selected: ${task.options.find((option) => option.value === work.answers[task.id])!.label}.`, passed ? "Meets the published rule." : `Practice: ${task.practice}`] };
+  });
+  checks.push({ id: "coding", label: "JavaScript basics", rule: "Return the sum of revenueCents, skipping nulls. Four published tests award ten points each.", passed: run.passed === 4, pointsPossible: 40, pointsEarned: run.passed * 10,
+    observations: run.tests.map((test) => `${test.passed ? "Passed" : "Not passed"}: ${test.label}.`) });
+  const score = checks.reduce((sum, check) => sum + check.pointsEarned, 0);
+  return { score, tier: score >= 80 ? "Strong evidence on this task" : score >= 50 ? "Developing evidence on this task" : "More practice needed on this task", checks };
+}
+
 export function pipelineVersion(submission: Submission) {
-  return submission.workSample ? { assessmentVersion: PIPELINE_VERSION, rubricVersion: PIPELINE_RUBRIC_VERSION } : null;
+  return submission.workSample?.kind === "data-engineer-v2" ? { assessmentVersion: CODING_VERSION, rubricVersion: CODING_RUBRIC_VERSION } : submission.workSample ? { assessmentVersion: PIPELINE_VERSION, rubricVersion: PIPELINE_RUBRIC_VERSION } : null;
 }
 
 export function evaluatePipeline(work: PipelineWork): Evaluation {
