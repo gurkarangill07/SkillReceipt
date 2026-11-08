@@ -9,6 +9,9 @@ const context = await browser.newContext({ viewport: { width: 1440, height: 1000
 await installTestCamera(context);
 const page = await context.newPage(); page.setDefaultTimeout(30_000);
 const errors = []; page.on("pageerror", (error) => errors.push(error.message));
+page.on("response", async (response) => {
+  if (response.url().includes("/api/assessment-sessions") && response.status() >= 400) console.log("Session API failure:", response.status(), await response.text());
+});
 let isolated;
 const waitReady = async () => { await page.waitForFunction(() => document.querySelector(".camera-check-status")?.textContent.includes("One face visible")); };
 const resume = async () => { await waitReady(); await page.getByRole("button", { name: "Resume test", exact: true }).click(); await page.getByRole("heading", { name: "Your session is protected.", exact: true }).waitFor(); };
@@ -114,4 +117,8 @@ try {
   await latePage.waitForFunction(() => window.__lateStream.getTracks().every((track) => track.readyState === "ended"));
   await delayed.close(); console.log("Late camera permission after leaving the assessment releases its tracks.");
   assert.deepEqual(errors, []);
+} catch (error) {
+  console.log("Session state at failure:", await page.locator(".assessment-session").innerText().catch(() => "Unavailable"));
+  await page.screenshot({ path: "test-results/session-failure.png", fullPage: true }).catch(() => {});
+  throw error;
 } finally { await context.close(); await browser.close(); await isolated?.close(); }

@@ -17,6 +17,7 @@ class MemoryBlob implements BlobDocumentClient {
   private version = 0;
   async get(name: string, options: Parameters<BlobDocumentClient["get"]>[1]) {
     assert.equal(options.access, "private"); assert.equal(options.useCache, false); assert.ok(options.abortSignal);
+    assert.deepEqual(options.headers, { "Accept-Encoding": "identity" });
     this.reads.push(name);
     const value = this.values.get(name);
     return value ? { statusCode: 200, stream: new Response(value.body).body!, blob: { etag: value.version, size: Buffer.byteLength(value.body) } } : null;

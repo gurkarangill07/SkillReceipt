@@ -72,7 +72,7 @@ export class FileJsonDocuments implements JsonDocuments {
 
 type BlobRead = { statusCode: number; stream: ReadableStream<Uint8Array> | null; blob: { etag: string; size: number | null } };
 export type BlobDocumentClient = {
-  get(pathname: string, options: { access: "private"; useCache: false; abortSignal: AbortSignal }): Promise<BlobRead | null>;
+  get(pathname: string, options: { access: "private"; useCache: false; headers: { "Accept-Encoding": "identity" }; abortSignal: AbortSignal }): Promise<BlobRead | null>;
   list(options: { prefix: string; cursor?: string; limit: number; abortSignal: AbortSignal }): Promise<{ blobs: { pathname: string }[]; hasMore: boolean; cursor?: string }>;
   put(pathname: string, body: string, options: { access: "private"; addRandomSuffix: false; allowOverwrite: boolean; ifMatch?: string; contentType: string; cacheControlMaxAge: number; abortSignal: AbortSignal }): Promise<unknown>;
   isConflict(error: unknown): boolean;
@@ -99,7 +99,9 @@ export class BlobJsonDocuments implements JsonDocuments {
   }
   async read(name: string): Promise<JsonDocument | null> {
     checkName(name);
-    const result = await (await this.client).get(this.prefix + name, { access: "private", useCache: false, abortSignal: AbortSignal.timeout(15_000) });
+    // Conditional writes need the object's strong ETag. CDN compression can
+    // change a JSON response to a weak ETag once the session log grows.
+    const result = await (await this.client).get(this.prefix + name, { access: "private", useCache: false, headers: { "Accept-Encoding": "identity" }, abortSignal: AbortSignal.timeout(15_000) });
     if (!result) return null;
     if (result.statusCode !== 200 || !result.stream || !result.blob.etag || (result.blob.size ?? 0) > MAX_DOCUMENT_BYTES) throw new Error("Stored document is unavailable.");
     const reader = result.stream.getReader();
