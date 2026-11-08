@@ -7,7 +7,7 @@ export default function HomePage() {
       <div className="hero-copy">
         <p className="eyebrow"><span className="tiny-rule" /> SKILLRECEIPT</p>
         <h1>Put your skills<br />to <em>work.</em></h1>
-        <p className="hero-description">Turn the skills on your resume into practical work samples. See how each result was scored, then choose whether to share it with employers.</p>
+        <p className="hero-description">Prove your approach in a camera-required work sample. Get a transparent skill score and a session integrity report, then choose whether to share the evidence with employers.</p>
         <div className="hero-actions">
           <Link className="button button-dark" href="/start">Demonstrate my skills<Icon name="arrow" size={18} /></Link>
           <Link href="/employer" className="button button-outline">Review candidate work<Icon name="arrow" size={17} /></Link>
@@ -27,10 +27,10 @@ export default function HomePage() {
     </section>
     <section className="career-how shell" aria-label="How SkillReceipt works">{[
       { n: "01", title: "Add your resume", copy: "Use your listed skills to find relevant work samples." },
-      { n: "02", title: "Complete a work sample", copy: "Make role-related decisions and solve a practical task." },
-      { n: "03", title: "Review the evidence", copy: "See how each check was scored and what to practice next." },
+      { n: "02", title: "Complete a monitored work sample", copy: "Keep your camera on, stay in fullscreen and solve a practical task." },
+      { n: "03", title: "Review the evidence", copy: "Inspect skill scoring and a separate timeline of session observations." },
       { n: "04", title: "Choose what to share", copy: "Publish your results for employers when you are ready." },
     ].map((step) => <div key={step.n}><span className="mono micro">{step.n}</span><h2>{step.title}</h2><p>{step.copy}</p></div>)}</section>
-    <section className="shell employer-callout panel"><div><p className="eyebrow">FOR EMPLOYERS</p><h2>Evaluate skills through work.</h2><p>Search candidate-published results, inspect submitted work and see how each task score was earned.</p></div><Link className="button button-outline" href="/employer">Explore candidate work<Icon name="arrow" size={17} /></Link></section>
+    <section className="shell employer-callout panel"><div><p className="eyebrow">FOR EMPLOYERS</p><h2>Evaluate skills through work.</h2><p>Review candidate-published work, scoring evidence and session integrity observations together. See the work behind the score and the context behind the attempt.</p></div><Link className="button button-outline" href="/employer">Explore candidate work<Icon name="arrow" size={17} /></Link></section>
   </>;
 }

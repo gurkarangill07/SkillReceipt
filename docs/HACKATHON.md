@@ -4,7 +4,7 @@ This is the current product scope. It supersedes the older account-portal specif
 
 ## Candidate journey
 
-Home → name and resume → suggested skill exercises → camera/practice session → assessment → score and feedback → optional publication → employer report.
+Home → name and resume → suggested skill exercises → required camera/fullscreen checks → assessment → score and integrity report → optional publication → employer report.
 
 There are no accounts, logins, passwords or email fields. A browser-owned Candidate ID connects the resume keyword summary and completed reports. Upload supports text-based PDF, DOCX and UTF-8 TXT, up to 2 MB; PDFs are limited to ten pages. The original resume bytes and extracted text are discarded. Only its filename and recognized skill keywords are retained.
 
@@ -18,9 +18,9 @@ The server validates submissions, computes scores and fingerprints the assessed 
 
 ## Session checks
 
-Before a normal attempt, the candidate chooses camera or practice and acknowledges the disclosed observations. Camera mode requires an explicit permission action and provides a local video preview, with no microphone or recording. Tab/focus changes and camera interruptions pause the exercise. The candidate can resume, reconnect or explicitly choose practice. Paste events and optional fullscreen exits are counted; clipboard content is not collected. Camera tracks stop on completion, navigation away and late permission resolution after leaving.
+Normal attempts require explicit consent, a live camera, one stable face in view, fullscreen and an owner-bound server session. MediaPipe checks face presence/count on the device. Tab/focus changes, fullscreen exits, sustained face/camera failures and connection problems pause the exercise. The candidate must restore the checks and explicitly resume; there is no practice fallback. Copy/paste/cut/drop actions are blocked and logged without collecting clipboard contents. Camera tracks stop on completion/navigation, including late permission resolution. Worked examples stay visibly unmonitored.
 
-The report shows the mode and browser-reported observations. These are review context, not a cheating verdict, proof of independent completion, identity verification or certification. No footage, audio, screen capture, browsing history or clipboard contents are retained. Automated camera tests use a fake media device; physical camera hardware has not been verified by those tests.
+The server preserves bounded ordered event categories, elapsed times, server receipt timestamps and connection-gap observations. The receipt API requires the monitored session and builds the official report from its stored log. Review events remain separate from the skill score. These observations do not prove independent completion, identity or liveness. No footage, audio, screen capture, browsing history or clipboard contents are retained. Automated camera tests run the real detector on controlled NASA portrait streams; physical camera hardware has not been verified. See [the full policy](PROCTORING.md) and [the featured engineering demonstration](DEMO.md).
 
 ## Employer journey and consent
 
@@ -32,4 +32,4 @@ Hiding a profile blocks fresh employer searches and report requests. Individual 
 
 ## Hosting
 
-Local development uses ignored `.data/` files. Vercel uses private Blob JSON documents for profiles and receipts, configured through server-only `BLOB_READ_WRITE_TOKEN`. Reads bypass provider caches; conditional ETag writes prevent lost profile/sharing updates across functions. Deployment without its storage connection fails closed. Source uploads exclude local receipts, environment secrets and test artifacts. The runtime is pinned to Node24.
+Local development uses ignored `.data/` files. The private Blob abstraction supports profiles, receipts and monitoring sessions through server-only `BLOB_READ_WRITE_TOKEN`. Reads bypass provider caches; conditional ETag writes prevent lost updates. Deployment without its storage connection fails closed. This monitoring revision has only been implemented and tested locally; it has not been pushed or deployed. Source uploads exclude local receipts, environment secrets and test artifacts. The runtime is pinned to Node24.

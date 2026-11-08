@@ -8,7 +8,7 @@ import { evaluate } from "../evaluate";
 import { CODING_VERSION, CODING_RUBRIC_VERSION, evaluateEngineer, evaluatePipeline, PIPELINE_VERSION, PIPELINE_RUBRIC_VERSION, pipelineVersion } from "../career";
 import { runCoding, storedCodingEvaluation } from "./coding";
 import { fingerprint } from "../fingerprint";
-import { isRecord, parseSubmission } from "../validation";
+import { InputError, isRecord, parseSubmission } from "../validation";
 import { SCENARIOS, evaluateScenario, scenarioVersions } from "../scenarios";
 import { FileJsonDocuments, cloudStorageEnabled, newCloudDocuments, type JsonDocuments } from "./documents";
 
@@ -18,7 +18,7 @@ export const hashOwner = (token: string) => createHash("sha256").update(token, "
 type StoredReceipt = OwnerReceipt & { ownerHash: string };
 
 export interface ReceiptRepository {
-  create(submission: Submission, ownerHash: string): Promise<OwnerReceipt>;
+  create(submission: Submission, ownerHash: string, receiptId?: string): Promise<OwnerReceipt>;
   getOwner(id: string, ownerHash: string): Promise<OwnerReceipt | null>;
   listOwner(ownerHash: string): Promise<ReceiptSummary[]>;
   setSharing(id: string, ownerHash: string, enabled: boolean): Promise<{ shareToken: string | null } | null>;
@@ -38,11 +38,14 @@ async function withLock<T>(directory: string, operation: () => Promise<T>): Prom
 
 function evidence(record: StoredReceipt): ReceiptEvidence {
   // Explicit allowlist: ownership and share capability never reach public exports.
-  return structuredClone({
+  const result = structuredClone({
     createdAt: record.createdAt, assessmentVersion: record.assessmentVersion,
     rubricVersion: record.rubricVersion, submission: record.submission,
     evaluation: record.evaluation, fingerprint: record.fingerprint,
   });
+  if (result.submission.session) delete result.submission.session.sessionId;
+  if (result.submission.workSample) delete result.submission.workSample.session.sessionId;
+  return result;
 }
 const ownerView = (record: StoredReceipt): OwnerReceipt => ({ ...evidence(record), id: record.id, shareToken: record.shareToken });
 
@@ -89,12 +92,20 @@ export class FileReceiptRepository implements ReceiptRepository {
     return (await this.documents.list()).filter((name) => name.endsWith(".json") && validId(name.slice(0, -5))).map((name) => name.slice(0, -5));
   }
 
-  async create(input: Submission, ownerHash: string): Promise<OwnerReceipt> {
+  async create(input: Submission, ownerHash: string, receiptId?: string): Promise<OwnerReceipt> {
     if (!validToken(ownerHash)) throw new Error("Invalid owner hash.");
+    if (receiptId !== undefined && !validId(receiptId)) throw new Error("Invalid receipt ID.");
     const submission = parseSubmission(input);
     return withLock(this.directory, async () => {
+      if (receiptId) {
+        const existing = await this.read(receiptId);
+        if (existing) {
+          if (existing.ownerHash !== ownerHash || JSON.stringify(existing.submission) !== JSON.stringify(submission)) throw new InputError("This session already has a different submission. Start a new attempt.");
+          return ownerView(existing);
+        }
+      }
       const record: StoredReceipt = {
-        id: randomUUID(), ownerHash, shareToken: null, createdAt: new Date().toISOString(),
+        id: receiptId ?? randomUUID(), ownerHash, shareToken: null, createdAt: new Date().toISOString(),
         ...(submission.scenario ? scenarioVersions(submission.scenario) : pipelineVersion(submission) ?? { assessmentVersion: ASSESSMENT_VERSION, rubricVersion: RUBRIC_VERSION }),
         submission, evaluation: submission.scenario ? evaluateScenario(submission.scenario) : submission.workSample?.kind === "data-engineer-v2" ? evaluateEngineer(submission.workSample, await runCoding(submission.workSample.code!)) : submission.workSample ? evaluatePipeline(submission.workSample) : evaluate(submission), fingerprint: fingerprint(submission),
       };

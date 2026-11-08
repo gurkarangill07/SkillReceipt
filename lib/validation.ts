@@ -1,6 +1,7 @@
 import type { DataRow, PipelineWork, SessionContext, Submission } from "./contracts";
 import { PIPELINE_TASKS } from "./career";
 import { getScenario } from "./scenarios";
+import { parseAudit } from "./proctor-validation";
 
 export class InputError extends Error {}
 export const MAX_BODY_BYTES = 65_536;
@@ -22,11 +23,14 @@ export function parseSession(value: unknown): SessionContext {
   };
   if (value.mode === "camera" && !value.cameraStarted) throw new InputError("Start the camera before submitting a camera session.");
   if (value.fullscreenStarted !== undefined && typeof value.fullscreenStarted !== "boolean") throw new InputError("Fullscreen status must be a boolean.");
+  if (value.sessionId !== undefined && (typeof value.sessionId !== "string" || !/^[a-f0-9-]{36}$/.test(value.sessionId))) throw new InputError("Invalid assessment session ID.");
   return { mode: value.mode as SessionContext["mode"], cameraStarted: value.cameraStarted, tabSwitches: count("tabSwitches")!, interruptions: count("interruptions")!, activeSeconds: count("activeSeconds")!,
     ...(value.focusLosses !== undefined ? { focusLosses: count("focusLosses", true)! } : {}),
     ...(value.pasteEvents !== undefined ? { pasteEvents: count("pasteEvents", true)! } : {}),
     ...(value.fullscreenExits !== undefined ? { fullscreenExits: count("fullscreenExits", true)! } : {}),
-    ...(value.fullscreenStarted !== undefined ? { fullscreenStarted: value.fullscreenStarted } : {}) };
+    ...(value.fullscreenStarted !== undefined ? { fullscreenStarted: value.fullscreenStarted } : {}),
+    ...(value.sessionId !== undefined ? { sessionId: value.sessionId as string } : {}),
+    ...(value.integrity !== undefined ? { integrity: parseAudit(value.integrity) } : {}) };
 }
 
 export function parseSubmission(value: unknown): Submission {

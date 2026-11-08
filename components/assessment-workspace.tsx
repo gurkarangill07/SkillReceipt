@@ -27,7 +27,7 @@ export function AssessmentWorkspace({ startFresh = false }: { startFresh?: boole
   const submitLock = useRef(false);
   const initialized = useRef(false);
   const errorRef = useRef<HTMLDivElement>(null);
-  const session = useAssessmentSession({ enabled: ready, demo: draft.demo });
+  const session = useAssessmentSession({ enabled: ready, demo: draft.demo, exercise: "junior-data-analyst" });
 
   useEffect(() => {
     if (initialized.current) return;
@@ -88,10 +88,10 @@ export function AssessmentWorkspace({ startFresh = false }: { startFresh?: boole
     setError("");
     if (retained.length === 0) { setError("Restore at least one row before submitting. An empty artifact cannot be assessed."); return; }
     if (draft.total.length === 0) { setError("Enter your stated total revenue in CAD. A semantically incorrect answer can still be submitted and assessed."); return; }
-    const snapshot = { ...snapshotSubmission(draft), session: session.snapshot() };
     submitLock.current = true;
     setPending(true);
     try {
+      const snapshot = { ...snapshotSubmission(draft), ...await session.prepareSubmission() };
       const result = await postJson("/api/receipts", snapshot);
       if (result.status !== 201 || !isRecord(result.body) || typeof result.body.id !== "string" || !/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(result.body.id)) {
         throw new Error("The server did not confirm a new receipt. Check My receipts before submitting again.");
@@ -101,6 +101,7 @@ export function AssessmentWorkspace({ startFresh = false }: { startFresh?: boole
       router.push(`/receipts/${result.body.id}`);
       router.refresh();
     } catch (failure) {
+      session.submissionFailed();
       setError(`${failure instanceof Error ? failure.message : "Submission failed."} Your draft is still here. If the response was lost or timed out, check My receipts before retrying.`);
       submitLock.current = false;
       setPending(false);

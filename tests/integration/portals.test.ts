@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { CookieClient, expectError } from "../helpers/http-client.mjs";
+import { CookieClient, expectError, monitoredSubmission } from "../helpers/http-client.mjs";
 import { startIsolatedApp } from "../helpers/next-server.mjs";
 import { CODING_STARTER, CODING_EXAMPLE } from "../../lib/coding";
 import { SCENARIOS } from "../../lib/scenarios";
@@ -24,7 +24,7 @@ test("guest challenges: no accounts, real scoring, private receipts and revocabl
       const receipt = await starter.json(); assert.equal(receipt.evaluation.score, 80);
       const page = await owner.request(`/receipts/${receipt.id}`); assert.equal(page.status, 200); assert.ok((await page.text()).includes("JavaScript basics"));
       const run = await owner.json("/api/coding", { code: CODING_EXAMPLE }); assert.equal((await run.json()).passed, 4);
-      const full = await owner.json("/api/receipts", { ...input, workSample: { ...input.workSample, code: CODING_EXAMPLE } }); assert.equal((await full.json()).evaluation.score, 100);
+      const full = await owner.json("/api/receipts", await monitoredSubmission(owner, { ...input, workSample: { ...input.workSample, code: CODING_EXAMPLE } })); assert.equal((await full.json()).evaluation.score, 100);
       await expectError(await visitor.request(`/api/receipts/${receipt.id}`), 404);
     });
     for (const scenario of SCENARIOS) await t.test(`${scenario.title}: score, owner view, CSV/JSON, sharing and revocation`, async () => {

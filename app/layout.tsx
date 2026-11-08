@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { Footer, Navigation } from "../components/navigation";
 import "./globals.css";
+import "./integrity.css";
 
 export const metadata: Metadata = {
   title: { default: "SkillReceipt — Let your work do the talking", template: "%s | SkillReceipt" },

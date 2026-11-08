@@ -1,44 +1,43 @@
-# Judge demo: from listed skills to reviewed work
+# Judge demo: a scored work sample with an integrity trail
 
-**Length:** 4–5 minutes · **Exercise:** Junior Data Engineer — make a small shop's order pipeline reliable.
+**Featured exercise: Junior Data Engineer — Reliable Orders Pipeline.** Open `/challenge/junior-data-engineer`. Allow 5–7 minutes, with a working webcam and a desktop browser that supports fullscreen. This revision is local only.
+
+## Start locally
+
+Use Node 24. Dependencies are already installed in the development checkout; a fresh checkout needs `npm ci` once. Run `npm run dev` (`npm.cmd run dev` in Windows PowerShell), then open `http://localhost:3000/challenge/junior-data-engineer`.
+
+Keep good lighting and rehearse with the actual webcam. Camera access is required. Do not select **View worked example** when demonstrating integrity: it deliberately creates an unmonitored, labeled example.
 
 ## The story
 
-A shop receives orders from an API. Retries can send the same order twice, some order amounts are missing, and a failed load may be replayed. The candidate must choose a stable business key, decide how to handle incomplete rows, select a replay-safe loading strategy, then write JavaScript to total valid order amounts.
-
-This lets the judges see the full product loop: resume parsing, role-relevant recommendations, practical decisions, executable code and test cases, a scored receipt, candidate-controlled publication, and employer review of the submitted evidence.
-
-## Opening
-
-> “SkillReceipt turns skills listed on a resume into practical work samples. Candidates see how each result was scored, and employers can review the work behind a candidate-published result.”
-
-Start from a fresh browser session so no earlier candidate data appears in the workspace. The score card on the landing page is clearly labeled as a sample result, not the current candidate's score.
+Northstar Retail imports daily checkout orders. The import may retry the same batch, one amount is unknown and a zero-value order is legitimate. The candidate makes three data-quality decisions, writes a revenue function, runs its tests and receives a reproducible score alongside a separate session integrity report.
 
 ## Walkthrough
 
-1. **Candidate context — 30 seconds.** Choose **Demonstrate my skills**. Enter a name and choose **Use a sample resume**. Point out the skills the parser recognizes, such as JavaScript, SQL, Python and ETL. Explain that these skills help recommend an exercise; they do not earn points.
+1. **Show the detailed brief.** Explain the source feed, retry behavior, missing values and the four published coding cases. Optional: start from `/start`, add a name and sample resume, and show the relevant recommendation. Resume skills never earn assessment points.
+2. **Start work sample.** Point out the redesigned permission screen. Read the disclosure, tick consent and click **Enable camera**. Show the actual preview and **One face visible · checks active**. The begin button remains disabled without a working camera and a stable face. Click **Enter fullscreen & begin**.
+3. **Demonstrate a blocked action.** Attempt Ctrl+V/Cmd+V in a test input. The content is blocked; **Paste blocked** appears in the live timeline. Clipboard contents are never collected.
+4. **Show a tab or fullscreen interruption.** Switch tabs, or press Escape to leave fullscreen. Return to the assessment: it is paused, answer controls are disabled and the event is visible. Click **Resume test** to restore fullscreen and sync the session. Prior events remain in the report.
+5. **Show the actual camera check.** Move out of view for at least 3 seconds. The assessment pauses and logs **No face in view**. Move back, wait for one stable face and resume. If time allows, have a second person enter view or cover the camera. Demonstrate **Stop camera & pause**, then **Reconnect camera**, wait for the face check and resume. The system never silently switches to practice.
+6. **Complete the decisions.** Choose **Order ID**, **Quarantine for review** and **Upsert by the business key**. Each earns 20 points. The sidebar provides the source feed and distinguishes the retry policy from the coding calculation.
+7. **Type and run the code.** The clipboard is blocked, so type this short function rather than pasting it:
 
-2. **Relevant assessment — 20 seconds.** Open the recommended **Junior Data Engineer** exercise. The resume match explains why it was suggested. The task is a small but recognizable data reliability problem, not a trivia quiz.
+   ```js
+   function totalRevenue(orders) {
+     let total = 0;
+     for (const order of orders) {
+       if (order.revenueCents !== null) total += order.revenueCents;
+     }
+     return total;
+   }
+   ```
 
-3. **Make the engineering decisions — 60 seconds.** Start the challenge. Use **Order ID** as the business key so retries update the same order; quarantine rows with a missing amount for review; choose an upsert keyed by the business key so replaying a batch does not double-count it. Call out the scoring rule: each decision has a published rule and is worth 20 points.
+   Click **Run tests**. Show the ordinary-amount, empty-list, null and genuine-zero cases. Each passing case earns 10 points. Code executes in the existing isolated server-side VM. The timeline records the test run without logging keystrokes.
+8. **Review & finish**, then **Get my receipt**. Show the score, per-rule evidence, submitted code, **Camera assessment · integrity report**, review events, server check-ins and the complete timeline. The deliberate interruptions create **Review required** while a correct solution still scores 100. That separates demonstrated skill from observations requiring a conversation.
+9. **Review as an employer.** Optionally publish the candidate profile, open a separate employer window, search JavaScript and inspect the report. The actual work and integrity timeline remain visible; private ownership capabilities do not. Download JSON evidence to show server receipt timestamps. Revoke profile publication and refresh the employer search to show candidate control.
 
-4. **Run the code — 60–90 seconds.** In the JavaScript task, implement `totalRevenue(orders)`. Add numeric `revenueCents`, skip `null`, and preserve a genuine zero. Run the provided tests and show the case results. The task runs in an isolated server-side runner; the four coding cases are worth 10 points each. Review the code, then submit the work.
+## Explain precisely
 
-5. **Inspect the receipt — 45 seconds.** Show the score, each decision's scoring evidence, the coding test outcomes, the submitted code and a concrete next step. State that the score describes this work sample, not overall job readiness. If you load the worked example instead of completing the task, its receipt stays visibly labeled as an example.
+“We require a camera and fullscreen, run face-presence checks on the device, pause interrupted attempts and preserve an event trail for review. The skill score comes from the actual submitted work. The observations support authenticity review; they are not proof of identity or a guarantee that outside help was impossible.”
 
-6. **Show candidate choice — 30 seconds.** Publish the profile for employer search. Explain that publication is opt-in and can be turned off. Then open the employer view and search **JavaScript** to find the candidate's assessed work.
-
-7. **Review as an employer — 45 seconds.** Open the report. Show the submitted JavaScript, per-case results, decision evidence and session report. Resume keywords remain separate from assessed evidence. The report is read-only; employers can see only the information included in the published profile and work sample.
-
-8. **Close on control — 20 seconds.** Return to the candidate result and hide the profile from employer search. Refresh the employer search to show that the profile is no longer available.
-
-## Camera option
-
-If camera access is available and time permits, choose **Camera session**, acknowledge the session disclosure, enable the preview and begin the task. The current product shows an on-device preview and browser-reported session context. It does not record or share video. If camera access is unavailable, use practice mode and continue the assessment.
-
-## Claims to keep precise
-
-- Scores show performance on a specific work sample; they do not establish identity, independent authorship, certification or broad job competence.
-- Session details are browser-reported context. They do not change the score or prove that outside help was impossible.
-- Resume keywords are self-reported context. They never substitute for assessed work.
-- Example answers are useful for previewing a receipt, but the example label remains visible to candidates and employers.
+No video or audio is recorded or uploaded. Face presence does not verify liveness or detect a photograph/replay. The browser cannot observe another device or every operating-system action. See [the full policy and limitations](PROCTORING.md).

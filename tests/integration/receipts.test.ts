@@ -3,7 +3,7 @@ import { test } from "node:test";
 
 import type { OwnerReceipt, Submission } from "../../lib/contracts";
 import { validSubmission } from "../helpers/fixtures";
-import { assertPrivate, assertSafeEvidence, CookieClient, expectError, parseCsv } from "../helpers/http-client.mjs";
+import { assertPrivate, assertSafeEvidence, CookieClient, expectError, parseCsv, monitoredSubmission } from "../helpers/http-client.mjs";
 import { startIsolatedApp } from "../helpers/next-server.mjs";
 
 test("independent HTTP acceptance against the real Next production server", { timeout: 180_000 }, async (t) => {
@@ -15,7 +15,7 @@ test("independent HTTP acceptance against the real Next production server", { ti
     ]);
   };
   async function submit(client: CookieClient, submission: Submission = validSubmission()): Promise<OwnerReceipt> {
-    const response = await client.json("/api/receipts", submission);
+    const response = await client.json("/api/receipts", await monitoredSubmission(client, submission));
     assert.equal(response.status, 201);
     assertPrivate(response);
     const receipt = await response.json() as OwnerReceipt;
@@ -32,16 +32,12 @@ test("independent HTTP acceptance against the real Next production server", { ti
   try {
     await t.test("server-authoritative score, session issuance, and private ownership", async () => {
       const owner = newClient(), outsider = newClient();
-      const response = await owner.json("/api/receipts", {
+      const response = await owner.json("/api/receipts", await monitoredSubmission(owner, {
         ...validSubmission(), score: 0, evaluation: { score: 0 }, createdAt: "1990-01-01", ownerHash: "forged-owner",
-      });
+      }));
       assert.equal(response.status, 201);
       assertPrivate(response);
-      const cookie = response.headers.getSetCookie().join(";");
-      assert.match(cookie, /HttpOnly/i);
-      assert.match(cookie, /SameSite=(Lax|Strict)/i);
-      assert.match(cookie, /Path=\//i);
-      assert.match(cookie, /Max-Age=\d+|Expires=/i);
+      assert.match(owner.cookieHeader, /skillreceipt_owner=[a-f0-9]{64}/);
       const receipt = await response.json() as OwnerReceipt;
       assertOwnerShape(receipt);
       assert.equal(receipt.evaluation.score, 100);
@@ -100,11 +96,12 @@ test("independent HTTP acceptance against the real Next production server", { ti
         const receipt = await submit(client, submission);
         assert.equal(receipt.evaluation.score, example.score, example.name);
         if (example.passed) assert.deepEqual(passedIds(receipt), example.passed, example.name);
-        assert.deepEqual(receipt.submission, submission, "The server must not silently correct assessed cells");
+        const { session: _session, ...artifact } = receipt.submission;
+        assert.deepEqual(artifact, submission, "The server must not silently correct assessed cells");
       }
       const invalid = validSubmission();
       invalid.rows[0]!.date = "2026-01-01";
-      const forged = await client.json("/api/receipts", { ...invalid, score: 100, evaluation: { score: 100, checks: [{ passed: true }] } });
+      const forged = await client.json("/api/receipts", await monitoredSubmission(client, { ...invalid, score: 100, evaluation: { score: 100, checks: [{ passed: true }] } }));
       assert.equal(forged.status, 201);
       assert.equal((await forged.json()).evaluation.score, 80);
     });

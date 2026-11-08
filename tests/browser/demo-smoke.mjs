@@ -3,11 +3,13 @@ import { mkdir } from "node:fs/promises";
 import { createRequire } from "node:module";
 import { SCENARIOS } from "../../lib/scenarios.ts";
 import { startIsolatedApp } from "../helpers/next-server.mjs";
+import { installTestCamera, startMonitored } from "./camera-helper.mjs";
 
 const require = createRequire(import.meta.url);
 const { chromium } = require(process.env.PLAYWRIGHT_MODULE || "playwright");
 const browser = await chromium.launch({ headless: true, args: ["--use-fake-device-for-media-stream", "--use-fake-ui-for-media-stream"], ...(process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE ? { executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE } : {}) });
 const context = await browser.newContext({ permissions: ["camera"], viewport: { width: 1440, height: 1000 } });
+await installTestCamera(context);
 const page = await context.newPage();
 page.setDefaultTimeout(15_000);
 const errors = [];
@@ -22,9 +24,9 @@ let isolated;
 try {
   isolated = process.env.SKILLRECEIPT_BROWSER_URL ? null : await startIsolatedApp();
   const origin = process.env.SKILLRECEIPT_BROWSER_URL || isolated.origin;
-  await page.goto(origin); await page.getByRole("heading", { name: /Show what/ }).waitFor();
+  await page.goto(origin); await page.getByRole("heading", { name: /Put your skills/ }).waitFor();
   await capture("home-desktop");
-  await page.getByRole("link", { name: "I’m looking for work", exact: true }).click();
+  await page.getByRole("link", { name: "Demonstrate my skills", exact: true }).click();
   await page.getByRole("textbox", { name: "What should we call you?" }).fill("Jordan Lee");
   await page.locator("#resume-upload").setInputFiles({ name: "invalid.exe", mimeType: "application/octet-stream", buffer: Buffer.from("test") });
   await page.locator("main [role=alert]").waitFor();
@@ -54,12 +56,8 @@ try {
   // Follow the real decision form, then submit a deliberately imperfect practical task.
   const qa = SCENARIOS.find((s) => s.id === "qa-engineer");
   await page.goto(`${origin}/challenge/qa-engineer`);
-  await page.getByRole("button", { name: "Start challenge", exact: true }).click();
-  assert.ok(await page.getByRole("button", { name: "Begin test", exact: true }).isDisabled());
-  await page.getByRole("checkbox").check();
-  await page.getByRole("button", { name: "Enable camera preview", exact: true }).click();
-  await page.locator("video").waitFor();
-  await page.getByRole("button", { name: "Begin test", exact: true }).click();
+  await page.bringToFront();
+  await startMonitored(page, "Start challenge");
   for (const [index, field] of qa.questions.entries()) {
     await page.locator(`input[name="${field.id}"][value="${field.answer}"]`).check();
     await page.getByRole("button", { name: index === 2 ? "Open exercise" : "Next", exact: true }).click();
@@ -70,7 +68,7 @@ try {
   assert.match(await page.locator(".score-number").innerText(), /90/);
   await page.getByRole("heading", { name: "Make your next attempt stronger." }).waitFor();
   await capture("qa-receipt");
-  assert.ok((await page.locator(".session-report").innerText()).includes("Camera session"));
+  assert.ok((await page.locator(".session-report").innerText()).includes("Camera assessment"));
   const privateResultUrl = page.url();
   await page.getByRole("button", { name: "Publish profile for employers", exact: true }).click();
   await page.getByRole("link", { name: "View as an employer", exact: true }).waitFor();
@@ -82,7 +80,7 @@ try {
   await employerPage.getByRole("button", { name: "View report", exact: true }).click();
   await employerPage.getByRole("heading", { name: "Jordan Lee", exact: true }).waitFor();
   assert.match(await employerPage.locator(".score-number").innerText(), /90/);
-  assert.ok((await employerPage.locator(".session-report").innerText()).includes("Camera session"));
+  assert.ok((await employerPage.locator(".session-report").innerText()).includes("Camera assessment"));
   assert.equal(await employerPage.getByText("Make your next attempt stronger.", { exact: true }).count(), 0);
   await employerPage.screenshot({ path: "test-results/employer-report.png", fullPage: true });
   await page.bringToFront();
@@ -115,7 +113,7 @@ try {
     console.log(`${scenario.title} example passed.`);
   }
   await page.goto(`${origin}/challenge/junior-data-engineer`);
-  await page.getByRole("button", { name: "Try an 80-point example", exact: true }).click();
+  await page.getByRole("button", { name: "View worked example", exact: true }).click();
   await page.getByRole("button", { name: "Get my receipt", exact: true }).click();
   await page.waitForURL(/\/receipts\/[a-f0-9-]+$/);
   assert.equal(await page.locator(".score-orbit strong").innerText(), "80");
@@ -144,7 +142,7 @@ try {
   const mobile = await browser.newContext({ viewport: { width: 390, height: 844 } });
   const mobilePage = await mobile.newPage();
   await mobilePage.goto(`${origin}/start`);
-  await mobilePage.getByRole("button", { name: "Use a sample résumé", exact: true }).click();
+  await mobilePage.getByRole("button", { name: "Use a sample resume", exact: true }).click();
   await mobilePage.getByRole("button", { name: "Find my exercises", exact: true }).waitFor();
   await mobilePage.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
   await mobilePage.screenshot({ path: "test-results/resume-mobile.png", fullPage: true });

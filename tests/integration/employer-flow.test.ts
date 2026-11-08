@@ -1,7 +1,8 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { CODING_EXAMPLE, CODING_STARTER } from "../../lib/coding";
-import { CookieClient, expectError } from "../helpers/http-client.mjs";
+import { CookieClient, expectError, monitoredSubmission } from "../helpers/http-client.mjs";
+import type { SessionContext } from "../../lib/contracts";
 import { startIsolatedApp } from "../helpers/next-server.mjs";
 
 test("résumé to assessment to employer report works without accounts and respects publication control", { timeout: 180_000 }, async (t) => {
@@ -10,6 +11,7 @@ test("résumé to assessment to employer report works without accounts and respe
   const employer = new CookieClient(app.origin);
   const outsider = new CookieClient(app.origin);
   let candidateId = "", privateReceiptId = "", ownerCookie = "";
+  let savedSession: SessionContext;
   const session = { mode: "practice", cameraStarted: false, tabSwitches: 1, interruptions: 0, activeSeconds: 42, focusLosses: 2, pasteEvents: 1, fullscreenExits: 0, fullscreenStarted: false };
   const engineer = { kind: "data-engineer-v2", answers: { key: "order_id", missing: "quarantine", load: "upsert" }, code: CODING_STARTER, session };
   try {
@@ -37,12 +39,16 @@ test("résumé to assessment to employer report works without accounts and respe
       assert.deepEqual(await (await employer.request("/api/employer/search")).json(), { candidates: [] });
     });
     await t.test("assessment is graded on the server, retains session observations, and remains private before publishing", async () => {
-      const submitted = await candidate.json("/api/receipts", { demo: false, session, workSample: engineer, score: 100 });
+      const submitted = await candidate.json("/api/receipts", await monitoredSubmission(candidate, { demo: false, session, workSample: engineer, score: 100 }, ["tab_hidden", "focus_lost", "paste_blocked"]));
       assert.equal(submitted.status, 201);
       const receipt = await submitted.json();
       privateReceiptId = receipt.id;
       assert.equal(receipt.evaluation.score, 80);
-      assert.deepEqual(receipt.submission.session, session);
+      savedSession = receipt.submission.session;
+      assert.equal(savedSession.mode, "camera");
+      assert.equal(savedSession.tabSwitches, 1);
+      assert.equal(savedSession.pasteEvents, 1);
+      assert.ok(savedSession.integrity!.events.some((event) => event.kind === "tab_hidden"));
       assert.equal(receipt.submission.demo, false);
       await expectError(await outsider.request(`/api/receipts/${privateReceiptId}`), 404);
       await expectError(await employer.request(`/api/employer/candidates/${candidateId}`), 404);
@@ -67,7 +73,7 @@ test("résumé to assessment to employer report works without accounts and respe
       assert.equal(report.reports.length, 1);
       assert.equal(report.reports[0].evaluation.score, 80);
       assert.equal(report.reports[0].submission.workSample.code, CODING_STARTER);
-      assert.deepEqual(report.reports[0].submission.session, session);
+      assert.deepEqual(report.reports[0].submission.session, savedSession);
       const serialized = JSON.stringify(report);
       for (const secret of [privateReceiptId, ownerCookie, "ownerHash", "shareToken", "PRIVATE_EMAIL", "passwordHash"]) assert.ok(!serialized.includes(secret), secret);
       assert.equal((await employer.request(`/employer?candidate=${candidateId}`)).status, 200);

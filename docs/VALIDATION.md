@@ -1,3 +1,25 @@
+# Required-camera integrity revision ? November 8, 2026
+
+This section describes the current local changes on demo/resume-to-employer. Earlier records below are historical. Nothing was pushed or deployed.
+
+## Verification completed
+
+- Type checking passed; the final production build passed.
+- Unit tests: **105 passed, 0 failed**, including the new owner/exercise-bound audit, event sequence/replay validation, stale-check-in detection, immutable sealed logs, receipt retry idempotence and session-ID exclusion.
+- HTTP integration: **32 passed, 0 failed** against isolated production servers. Normal submissions without monitoring, denied preflight conditions, mismatched owners, unsynced/paused sessions and changed receipt replays are rejected. Existing scoring, private ownership, exports, publication/search/revocation and process-restart persistence pass.
+- Camera Chromium suite passed using the real MediaPipe face detector on controlled NASA portrait canvas streams. Verified desktop and 375 px setup layouts, no access before consent, mandatory camera/fullscreen, paste blocking, injected tab/focus events, fullscreen-exit pause, sustained absent/multiple faces, covered camera, camera stop/reconnect, offline resync, a real scored engineering submission, preserved incidents, denied-permission blocking, media release after submission and late permission resolution after leaving.
+- Candidate-to-employer Chromium suite passed: real resume text upload, recommendations, monitored QA attempt scoring 90, profile publication, employer detailed report, privacy/share/revocation, all six worked examples, and desktop/mobile layouts. No uncaught page errors.
+- Visually inspected the actual camera setup screenshots at desktop and phone sizes. Captures are in ignored test-results/; camera-setup-desktop.png, camera-setup-mobile.png and integrity-receipt.png show the revised flow.
+- Diff whitespace check passed.
+
+## Verification limits
+
+Media is controlled test data, not the PC's physical webcam. Headless tab/focus conditions are injected where browser tab activation does not change visibility. Real hardware, lighting variations, gaze, liveness, virtual-camera detection and exhaustive accessibility are not verified. Face presence can be satisfied by a photograph/replay. The browser can report false observations if modified; the server verifies ownership, ordering, receipt timing and report persistence rather than authenticating the sensor. No video, audio, screenshots, raw keystrokes, clipboard contents or browsing history is retained.
+
+Use [DEMO.md](DEMO.md) for the judge rehearsal and [PROCTORING.md](PROCTORING.md) for policy and limits. The featured exercise is Junior Data Engineer ? Reliable Orders Pipeline. A worked example is deliberately unmonitored and must not be used to demonstrate the live integrity checks.
+
+---
+
 # resume-to-employer revision — November 7, 2026
 
 This record describes the current app. Earlier guest-catalog and account-portal results below are historical.

@@ -9,3 +9,4 @@ export function assertPrivate(response: Response): void;
 export function expectError(response: Response, status: number): Promise<{ error: string }>;
 export function assertSafeEvidence(evidence: unknown, secrets?: Array<string | null | undefined>): void;
 export function parseCsv(text: string): string[][];
+export function monitoredSubmission<T>(client: CookieClient, input: T, kinds?: string[]): Promise<T & { session?: import("../../lib/contracts").SessionContext; sessionSequence?: number }>;

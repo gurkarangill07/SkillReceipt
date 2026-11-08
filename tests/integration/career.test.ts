@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { CookieClient, expectError } from "../helpers/http-client.mjs";
+import { CookieClient, expectError, monitoredSubmission } from "../helpers/http-client.mjs";
 import { startIsolatedApp } from "../helpers/next-server.mjs";
 import { pdfFixture, docxFixture } from "../helpers/resume-fixtures";
 
@@ -55,10 +55,10 @@ test("résumé to role score and employer evidence", { timeout: 120_000 }, async
     await t.test("realistic correct attempt scores 100; camera metrics cannot change score or artifact fingerprint", async () => {
       const correct = structuredClone(input); correct.workSample.answers.schema = "strict"; correct.workSample.answers.partition = "order_date";
       correct.workSample.session.mode = "practice";
-      const first = await (await owner.json("/api/receipts", correct)).json();
+      const first = await (await owner.json("/api/receipts", await monitoredSubmission(owner, correct))).json();
       assert.equal(first.evaluation.score, 100);
       const secondInput = structuredClone(correct); secondInput.workSample.session.tabSwitches = 4;
-      const second = await (await owner.json("/api/receipts", secondInput)).json();
+      const second = await (await owner.json("/api/receipts", await monitoredSubmission(owner, secondInput, ["tab_hidden"])) ).json();
       assert.equal(second.evaluation.score, 100); assert.equal(second.fingerprint, first.fingerprint);
       assert.notEqual(second.id, first.id);
     });

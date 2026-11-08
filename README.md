@@ -17,7 +17,7 @@ Open **http://localhost:3000**. On Windows, use `npm.cmd` if PowerShell blocks `
 
 1. **Add your background.** Enter a name and upload a PDF, DOCX or TXT resume (up to 2 MB; text-based PDFs up to ten pages). A sample resume is available. Only the filename and recognized skill keywords are saved; the original file and extracted text are not retained.
 2. **Choose a suggested exercise.** Recognized resume skills rank the six supported assessments. Recommendations show their matching keywords. You can browse all exercises when a skill is not covered. resume claims never earn assessment points.
-3. **Take the assessment.** Choose a camera session or practice without a camera. Camera permission requires an explicit action. The local preview, tab/focus changes, paste counts, camera interruptions and optional fullscreen exits provide session context. Interruptions pause the exercise until you resume.
+3. **Take the assessment.** Read the monitoring disclosure, consent and enable the camera. A working camera, one visible face, fullscreen and a connected session log are required for every normal attempt. Tab/focus loss, fullscreen exit, sustained face/camera issues and connection failures pause the exercise. Restore the checks and explicitly resume. Copy, paste, cut and drag and drop are blocked. Worked examples remain visibly unmonitored and cannot represent independent attempts.
 4. **Review your result.** Server-side checks produce the score, submitted answers, per-check evidence and specific next steps. Download CSV/JSON or create an optional read-only receipt link.
 5. **Publish when ready.** Publishing makes your name, resume skill summary and completed reports discoverable by employers. It starts off and can be turned off again. Example attempts remain labeled.
 6. **Review as an employer.** Search by assessed skill, role, name or Candidate ID. Filter by minimum score and example attempts, then inspect the actual work, checks and session report. resume-only claims do not satisfy an assessed-skill search; an unrelated high score cannot satisfy another exercise's score filter.
@@ -37,13 +37,13 @@ The engineer and scenario exercises award 20 points per decision and 10 per prac
 
 ## Session checks and privacy
 
-Camera video stays on the device. No footage, audio, screen recording, clipboard content or browsing history is saved. Only disclosed counts and session status accompany the result. These browser-reported observations can help a reviewer ask questions, but **do not make a test cheating-proof, verify identity or constitute certification**. They do not change the skill score.
+Camera frames are processed on the device using MediaPipe face detection. No footage, audio, screen recording, clipboard content, face images or browsing history is saved. A server-issued session stores ordered event categories, elapsed times and server receipt timestamps. The report includes face absence/multiple faces, camera health, focus/fullscreen changes, blocked clipboard actions, answer-edit/step/test-run events, inactivity and connection gaps. Browser observations help a reviewer ask questions, but **do not make a test cheating-proof, verify identity or establish liveness**. They do not change the skill score. See [the monitoring policy](docs/PROCTORING.md).
 
 Private profiles/results belong to an opaque HttpOnly browser cookie lasting 30 days. Clearing it removes private access, so download receipts you want to keep. Employer profile publication and individual receipt links are separate controls; turning one off does not revoke the other. Previously saved copies cannot be recalled.
 
 ## Demo and verification
 
-Use the [two-minute demo script](docs/DEMO.md) and [current scope](docs/HACKATHON.md).
+Use the [judge demo script](docs/DEMO.md) and [current scope](docs/HACKATHON.md). The featured integrity showcase is **Junior Data Engineer — Reliable Orders Pipeline** at `/challenge/junior-data-engineer`. Start a normal attempt with a real camera to demonstrate monitoring; the worked example only demonstrates scoring.
 
 ```sh
 npm run typecheck

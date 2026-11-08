@@ -5,9 +5,9 @@ Two Playwright/Chromium scripts exercise the working app:
 | Script | Scope |
 | --- | --- |
 | `demo-smoke.mjs` | Résumé upload/sample, recommendations, assessment results, candidate publication, employer search and detailed reports, downloads/sharing, example labels, and desktop/mobile layouts |
-| `session-smoke.mjs` | Explicit camera consent, local preview, pause/resume, camera interruption/reconnect, paste observations, optional fullscreen exit, practice fallback and media cleanup |
+| `session-smoke.mjs` | Required camera/consent/fullscreen, real on-device detection with controlled image streams, absent/multiple faces, covered camera, pause/resume, clipboard blocking, reconnection, network resync, full engineering submission/report and denied-permission blocking |
 
-Session automation uses a **fake media device**, injected focus/paste events where headless browsers need them, and simulated permission errors. It does not verify a physical camera or establish that the assessment is cheating-proof. See [docs/VALIDATION.md](../../docs/VALIDATION.md) for observed results and remaining limits.
+Session automation uses a **canvas video stream of a public-domain NASA portrait**, injected focus/paste events where headless browsers need them, and simulated permission errors. MediaPipe runs its real face model against these frames; there is no production test override. It does not verify a physical camera, liveness or identity. See [the fixture attribution](fixtures/README.md) and [docs/VALIDATION.md](../../docs/VALIDATION.md).
 
 ## Run
 

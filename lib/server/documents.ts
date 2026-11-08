@@ -93,7 +93,7 @@ export class BlobJsonDocuments implements JsonDocuments {
   readonly kind = "blob" as const;
   readonly prefix: string;
   private readonly client: Promise<BlobDocumentClient>;
-  constructor(namespace: "receipts" | "people", client?: BlobDocumentClient) {
+  constructor(namespace: "receipts" | "people" | "proctoring", client?: BlobDocumentClient) {
     this.prefix = `skillreceipt/v1/${namespace}/`;
     this.client = client ? Promise.resolve(client) : sdkClient();
   }
@@ -159,4 +159,4 @@ export function cloudStorageEnabled(): boolean {
   return enabled;
 }
 
-export const newCloudDocuments = (namespace: "receipts" | "people") => new BlobJsonDocuments(namespace);
+export const newCloudDocuments = (namespace: "receipts" | "people" | "proctoring") => new BlobJsonDocuments(namespace);
