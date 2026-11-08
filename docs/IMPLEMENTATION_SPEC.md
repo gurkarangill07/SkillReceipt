@@ -1,6 +1,6 @@
-> Current lead-requested dark portals, accounts, résumé sharing and coding scope: [DARK_PORTALS_SPEC.md](DARK_PORTALS_SPEC.md). The specification below records an earlier version.
+> Current lead-requested dark portals, accounts, resume sharing and coding scope: [DARK_PORTALS_SPEC.md](DARK_PORTALS_SPEC.md). The specification below records an earlier version.
 
-> Historical original specification. The lead subsequently requested résumé context, role selection and focused sessions; those additions are specified in [DEMO_V2_SPEC.md](DEMO_V2_SPEC.md). Original sales-assessment semantics remain frozen.
+> Historical original specification. The lead subsequently requested resume context, role selection and focused sessions; those additions are specified in [DEMO_V2_SPEC.md](DEMO_V2_SPEC.md). Original sales-assessment semantics remain frozen.
 
 > Shared product specification supplied by the team lead. Machine-specific project paths have been replaced with a portable placeholder; use your own clone. This is a specification, not a claim that features are implemented. The shared interface contract specializes its suggested architecture. The lead separately authorized repository creation and this starter-documentation upload.
 
@@ -42,7 +42,7 @@ The core sequence is:
 
 **Complete a practical challenge → Submit the work → Run published deterministic checks → Issue an evidence-backed skill receipt → Share an employer-view evidence page.**
 
-SkillReceipt is **not a résumé builder**. Do not implement résumé generation, résumé rewriting, résumé uploads, résumé templates, résumé scoring, or résumé PDF export. Do not make a résumé the final output. The final output is a receipt and an inspectable evidence page.
+SkillReceipt is **not a resume builder**. Do not implement resume generation, resume rewriting, resume uploads, resume templates, resume scoring, or resume PDF export. Do not make a resume the final output. The final output is a receipt and an inspectable evidence page.
 
 This prototype checks the **submitted artifact** against the rules of **one specific assessment**. It does not verify:
 
@@ -559,7 +559,7 @@ The work is complete only when the single end-to-end flow is functioning, typech
 README must explain:
 
 - What the app does and its intended user.
-- Explicitly: it is not a résumé builder.
+- Explicitly: it is not a resume builder.
 - Installation, Node version, `npm ci`, local run, production build/start.
 - The one assessment, its conventions, all six checks, and score interpretation.
 - Anonymous browser ownership, session expiry/loss, and local data location.

@@ -697,7 +697,8 @@ textarea.text-input { resize: vertical; min-height: 110px; }
 .career-hero h1 { font-size: clamp(50px, 5.3vw, 76px); }
 .career-preview { padding: 30px; box-shadow: 0 18px 60px #213c2e0b; transform: rotate(1deg); }
 .preview-heading, .preview-score, .preview-checks > span { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-.preview-role { display: block; font-size: 11px; letter-spacing: .12em; margin-top: 32px; color: var(--muted); }
+.preview-example-banner { display: flex; align-items: center; gap: 8px; margin-top: 20px; padding: 11px 13px; border: 1px solid #b8c68e; border-radius: 5px; background: #edf3d9; color: #354523; font-size: 10px; font-weight: 700; letter-spacing: .07em; }
+.preview-role { display: block; font-size: 11px; letter-spacing: .12em; margin-top: 18px; color: var(--muted); }
 .preview-score { margin: 9px 0 22px; }
 .preview-score > strong { font-size: 85px; line-height: 1.1; letter-spacing: -.07em; font-weight: 550; }
 .preview-score > strong > span { font-size: 22px; letter-spacing: -.03em; color: var(--muted); }
@@ -919,6 +920,7 @@ summary { cursor: pointer; }
 .career-hero h1 { font-size: clamp(48px, 5.4vw, 72px); line-height: 1.07; }
 .career-preview { transform: none; box-shadow: 0 18px 70px #0003; border-color: #35455e; }
 .career-preview h2 { font-size: 24px; }
+.preview-example-banner { background: #293421; border-color: #536741; color: #dce8bd; }
 .preview-next { border-left: 2px solid var(--forest); }
 .career-how p { margin-top: 9px; line-height: 1.7; }
 .flow-progress li { color: var(--muted); }
@@ -1158,7 +1160,7 @@ summary { cursor: pointer; }
   .career-how { grid-template-columns: repeat(2, 1fr); }
 }
 
-/* Résumé, assessment and employer journey */
+/* resume, assessment and employer journey */
 .journey-steps { list-style: none; padding: 0; display: flex; justify-content: center; gap: 55px; margin: 0 0 44px; }
 .journey-steps li { display: flex; align-items: center; gap: 10px; color: #8090a6; font-size: 13px; }
 .journey-steps li > span { display: grid; place-items: center; width: 27px; height: 27px; border: 1px solid var(--line); border-radius: 50%; font-size: 12px; }

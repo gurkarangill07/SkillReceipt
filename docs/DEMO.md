@@ -1,28 +1,44 @@
-# Two-minute demo
+# Judge demo: from listed skills to reviewed work
 
-Open http://localhost:3000 in a fresh browser session. No accounts, keys or prepared users are required.
+**Length:** 4–5 minutes · **Exercise:** Junior Data Engineer — make a small shop's order pipeline reliable.
 
-**Pitch:** “A résumé lists skills. SkillReceipt suggests a practical task, shows the evidence behind the score, and lets employers review that work.”
+## The story
 
-1. **Start with a résumé — 20 seconds.** Choose **I’m looking for work**. Enter a name, select **Use a sample résumé**, then **Find my exercises**. The sample goes through the real parser. Point out the recognized JavaScript, SQL, Python and ETL keywords.
-2. **Follow the recommendation — 10 seconds.** Open **Junior Data Engineer** from the suggestions. Its card explains why it matches the résumé. The résumé itself earns no points.
-3. **Show a useful result — 30 seconds.** Select **Try an 80-point example**, then **Get my receipt**. Show the 80/100 score, three successful decisions, partial JavaScript credit, submitted code and next steps. The example label stays visible; camera/session monitoring is off for a worked example.
-4. **Let employers find it — 15 seconds.** Select **Publish profile for employers**, read the publication summary, then **View as an employer**. This connects the completed report to the same Candidate ID without a login.
-5. **Review the evidence — 35 seconds.** Search **JavaScript**. Open the candidate and inspect the 20/40 coding evidence, per-case outcomes and full submitted code. The score is for this exercise, not all JavaScript ability. Show the session report and the résumé keyword summary separately; employers do not receive a raw résumé file or private coaching plan.
-6. **Show candidate control — 10 seconds.** Return to the private result or **My results** and choose **Hide from employer search**. A fresh employer search/report request can no longer retrieve the profile. Individual shared receipt links have their own revoke control.
+A shop receives orders from an API. Retries can send the same order twice, some order amounts are missing, and a failed load may be replayed. The candidate must choose a stable business key, decide how to handle incomplete rows, select a replay-safe loading strategy, then write JavaScript to total valid order amounts.
 
-## Add a live camera demonstration
+This lets the judges see the full product loop: resume parsing, role-relevant recommendations, practical decisions, executable code and test cases, a scored receipt, candidate-controlled publication, and employer review of the submitted evidence.
 
-Allow an extra minute or two and rehearse the presentation device's camera permission first.
+## Opening
 
-1. Start a fresh Data Engineer attempt with **Start challenge**. In **Session checks**, acknowledge the observations, choose **Camera session**, explicitly **Enable camera preview**, then **Begin test**. There is no automatic camera access or recording.
-2. Optionally select **Use full screen**. Move away from the test tab/window to show the pause, then return and **Resume test**. A stopped/interrupted camera requires reconnecting or an explicit switch to practice. Session observations do not deduct points.
-3. Answer **Order ID**, **Quarantine for review**, and **Upsert by the business key**. On the coding task, run the starter to show 2/4 cases. Submit the unchanged starter for 80/100 and inspect the session observations in its report. Loading the worked solution would label this attempt as an example.
+> “SkillReceipt turns skills listed on a resume into practical work samples. Candidates see how each result was scored, and employers can review the work behind a candidate-published result.”
 
-If permission is unavailable, select **Practice without camera**. That attempt is clearly reported as practice. Automated camera checks use a fake media device; they do not verify the presenter's physical camera.
+Start from a fresh browser session so no earlier candidate data appears in the workspace. The score card on the landing page is clearly labeled as a sample result, not the current candidate's score.
 
-## Optional breadth
+## Walkthrough
 
-Use **Browse all exercises** to show QA, Frontend, Product Analytics, Cybersecurity and Data Analysis. Product Analytics' worked example demonstrates 10% control conversion, 12.5% variant conversion, 2.5 percentage points of absolute increase and 25% relative uplift. All six work samples can be submitted and reviewed.
+1. **Candidate context — 30 seconds.** Choose **Demonstrate my skills**. Enter a name and choose **Use a sample resume**. Point out the skills the parser recognizes, such as JavaScript, SQL, Python and ETL. Explain that these skills help recommend an exercise; they do not earn points.
 
-Session observations are browser-reported context, not proof that cheating is impossible. Results are evidence about a specific task, not identity verification or certification. Local links require access to this server. The Vercel version uses private persistent storage; local browser history does not automatically transfer to the hosted URL.
+2. **Relevant assessment — 20 seconds.** Open the recommended **Junior Data Engineer** exercise. The resume match explains why it was suggested. The task is a small but recognizable data reliability problem, not a trivia quiz.
+
+3. **Make the engineering decisions — 60 seconds.** Start the challenge. Use **Order ID** as the business key so retries update the same order; quarantine rows with a missing amount for review; choose an upsert keyed by the business key so replaying a batch does not double-count it. Call out the scoring rule: each decision has a published rule and is worth 20 points.
+
+4. **Run the code — 60–90 seconds.** In the JavaScript task, implement `totalRevenue(orders)`. Add numeric `revenueCents`, skip `null`, and preserve a genuine zero. Run the provided tests and show the case results. The task runs in an isolated server-side runner; the four coding cases are worth 10 points each. Review the code, then submit the work.
+
+5. **Inspect the receipt — 45 seconds.** Show the score, each decision's scoring evidence, the coding test outcomes, the submitted code and a concrete next step. State that the score describes this work sample, not overall job readiness. If you load the worked example instead of completing the task, its receipt stays visibly labeled as an example.
+
+6. **Show candidate choice — 30 seconds.** Publish the profile for employer search. Explain that publication is opt-in and can be turned off. Then open the employer view and search **JavaScript** to find the candidate's assessed work.
+
+7. **Review as an employer — 45 seconds.** Open the report. Show the submitted JavaScript, per-case results, decision evidence and session report. Resume keywords remain separate from assessed evidence. The report is read-only; employers can see only the information included in the published profile and work sample.
+
+8. **Close on control — 20 seconds.** Return to the candidate result and hide the profile from employer search. Refresh the employer search to show that the profile is no longer available.
+
+## Camera option
+
+If camera access is available and time permits, choose **Camera session**, acknowledge the session disclosure, enable the preview and begin the task. The current product shows an on-device preview and browser-reported session context. It does not record or share video. If camera access is unavailable, use practice mode and continue the assessment.
+
+## Claims to keep precise
+
+- Scores show performance on a specific work sample; they do not establish identity, independent authorship, certification or broad job competence.
+- Session details are browser-reported context. They do not change the score or prove that outside help was impossible.
+- Resume keywords are self-reported context. They never substitute for assessed work.
+- Example answers are useful for previewing a receipt, but the example label remains visible to candidates and employers.

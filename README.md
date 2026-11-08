@@ -1,8 +1,6 @@
 # SkillReceipt
 
-A résumé lists skills. SkillReceipt gives job seekers a practical exercise and employers a report of the work behind the score.
-
-**No registration, login, email or password.**
+A resume lists skills. SkillReceipt gives job seekers a practical exercise and employers a report of the work behind the score.
 
 ## Run locally
 
@@ -17,12 +15,12 @@ Open **http://localhost:3000**. On Windows, use `npm.cmd` if PowerShell blocks `
 
 ## The flow
 
-1. **Add your background.** Enter a name and upload a PDF, DOCX or TXT résumé (up to 2 MB; text-based PDFs up to ten pages). A sample résumé is available. Only the filename and recognized skill keywords are saved; the original file and extracted text are not retained.
-2. **Choose a suggested exercise.** Recognized résumé skills rank the six supported assessments. Recommendations show their matching keywords. You can browse all exercises when a skill is not covered. Résumé claims never earn assessment points.
+1. **Add your background.** Enter a name and upload a PDF, DOCX or TXT resume (up to 2 MB; text-based PDFs up to ten pages). A sample resume is available. Only the filename and recognized skill keywords are saved; the original file and extracted text are not retained.
+2. **Choose a suggested exercise.** Recognized resume skills rank the six supported assessments. Recommendations show their matching keywords. You can browse all exercises when a skill is not covered. resume claims never earn assessment points.
 3. **Take the assessment.** Choose a camera session or practice without a camera. Camera permission requires an explicit action. The local preview, tab/focus changes, paste counts, camera interruptions and optional fullscreen exits provide session context. Interruptions pause the exercise until you resume.
 4. **Review your result.** Server-side checks produce the score, submitted answers, per-check evidence and specific next steps. Download CSV/JSON or create an optional read-only receipt link.
-5. **Publish when ready.** Publishing makes your name, résumé skill summary and completed reports discoverable by employers. It starts off and can be turned off again. Example attempts remain labeled.
-6. **Review as an employer.** Search by assessed skill, role, name or Candidate ID. Filter by minimum score and example attempts, then inspect the actual work, checks and session report. Résumé-only claims do not satisfy an assessed-skill search; an unrelated high score cannot satisfy another exercise's score filter.
+5. **Publish when ready.** Publishing makes your name, resume skill summary and completed reports discoverable by employers. It starts off and can be turned off again. Example attempts remain labeled.
+6. **Review as an employer.** Search by assessed skill, role, name or Candidate ID. Filter by minimum score and example attempts, then inspect the actual work, checks and session report. resume-only claims do not satisfy an assessed-skill search; an unrelated high score cannot satisfy another exercise's score filter.
 
 ## Six supported assessments
 
@@ -60,4 +58,4 @@ npm run test:e2e
 
 Local development stores profiles and receipts in ignored `.data/` files. Vercel deployments use a connected **private Vercel Blob store**, selected by the server-only `BLOB_READ_WRITE_TOKEN` environment variable. Cloud reads bypass the cache and updates use ETag conditions, so publication/link revocation is checked on fresh requests and concurrent updates cannot silently overwrite each other. Vercel fails closed if storage is missing. Local test data is excluded from deployment.
 
-Deployment settings are in `vercel.json`; connect a private Blob store to the linked Vercel project, then run `vercel --prod`. Never commit the storage token. Login/registration remain disabled; no account is required to use the app.
+Deployment settings are in `vercel.json`; connect a private Blob store to the linked Vercel project, then run `vercel --prod`. Never commit the storage token.

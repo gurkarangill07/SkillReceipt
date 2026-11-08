@@ -1,20 +1,20 @@
-# Hackathon scope: résumé to employer evidence
+# Hackathon scope: resume to employer evidence
 
 This is the current product scope. It supersedes the older account-portal specifications and the earlier catalog-only guest revision.
 
 ## Candidate journey
 
-Home → name and résumé → suggested skill exercises → camera/practice session → assessment → score and feedback → optional publication → employer report.
+Home → name and resume → suggested skill exercises → camera/practice session → assessment → score and feedback → optional publication → employer report.
 
-There are no accounts, logins, passwords or email fields. A browser-owned Candidate ID connects the résumé keyword summary and completed reports. Upload supports text-based PDF, DOCX and UTF-8 TXT, up to 2 MB; PDFs are limited to ten pages. The original résumé bytes and extracted text are discarded. Only its filename and recognized skill keywords are retained.
+There are no accounts, logins, passwords or email fields. A browser-owned Candidate ID connects the resume keyword summary and completed reports. Upload supports text-based PDF, DOCX and UTF-8 TXT, up to 2 MB; PDFs are limited to ten pages. The original resume bytes and extracted text are discarded. Only its filename and recognized skill keywords are retained.
 
-Recommendations rank the six implemented exercises using explicit résumé keyword matches and explain those matches. They do not claim arbitrary-role generation or score résumé claims. Unmatched backgrounds can browse the full catalog.
+Recommendations rank the six implemented exercises using explicit resume keyword matches and explain those matches. They do not claim arbitrary-role generation or score resume claims. Unmatched backgrounds can browse the full catalog.
 
 ## Work samples
 
 Data Engineer uses three decisions and the isolated JavaScript runner's four published cases. Data Analyst retains the editable sales dataset and six-rule evaluator. Frontend, QA, Product Analytics and Cybersecurity each use three decisions and a four-check practical exercise with their own source material. Frontend/security tasks assess the submitted decisions; they do not claim to execute a complete website or investigate a real incident.
 
-The server validates submissions, computes scores and fingerprints the assessed artifact. Session observations, résumé context and claimed scores do not affect grading. Existing receipt versions remain readable. Normal scenario payloads omit scoring answer keys; worked examples are explicit and labeled. The engineer example scores 80/100, with partial coding credit. Other completed examples score 100/100.
+The server validates submissions, computes scores and fingerprints the assessed artifact. Session observations, resume context and claimed scores do not affect grading. Existing receipt versions remain readable. Normal scenario payloads omit scoring answer keys; worked examples are explicit and labeled. The engineer example scores 80/100, with partial coding credit. Other completed examples score 100/100.
 
 ## Session checks
 
@@ -24,7 +24,7 @@ The report shows the mode and browser-reported observations. These are review co
 
 ## Employer journey and consent
 
-A candidate publishes only after completing an assessment. Publication starts off. It exposes the name, Candidate ID, résumé keyword summary and all completed reports, including labeled examples. Employer search needs no login and supports skill/role/name/ID, minimum score and example filters. Only positively earned assessment checks/aliases satisfy a skill search; résumé-only claims do not. Score filters use the matching exercise rather than an unrelated high score.
+A candidate publishes only after completing an assessment. Publication starts off. It exposes the name, Candidate ID, resume keyword summary and all completed reports, including labeled examples. Employer search needs no login and supports skill/role/name/ID, minimum score and example filters. Only positively earned assessment checks/aliases satisfy a skill search; resume-only claims do not. Score filters use the matching exercise rather than an unrelated high score.
 
 Reports include the actual submitted answers/code/data, published checks, score and session context. They exclude private receipt IDs, share tokens, owner hashes and the candidate's private practice-plan section. No employers, candidates or scores are fabricated in an empty installation.
 

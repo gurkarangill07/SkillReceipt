@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { EmployerWorkspace } from "../../components/employer-workspace";
 import "../employer.css";
 
-export const metadata: Metadata = { title: "Find candidates", robots: { index: false, follow: false } };
+export const metadata: Metadata = { title: "Review candidate work", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
 
 export default async function EmployerPage({ searchParams }: { searchParams: Promise<{ candidate?: string; q?: string }> }) {

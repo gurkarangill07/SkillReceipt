@@ -1,4 +1,4 @@
-> Current lead-requested dark portals, accounts, résumé sharing and coding scope: [DARK_PORTALS_SPEC.md](DARK_PORTALS_SPEC.md). The specification below records an earlier version.
+> Current lead-requested dark portals, accounts, resume sharing and coding scope: [DARK_PORTALS_SPEC.md](DARK_PORTALS_SPEC.md). The specification below records an earlier version.
 
 > The contract below records the original three-role baseline. The lead-approved revision adds an optional `Submission.workSample` for versioned pipeline decisions and client-reported session context, six pipeline check IDs, and an optional assessment version on pipeline summaries. `lib/contracts.ts` is the current canonical source. Legacy submissions retain exactly their original safe shape. See [DEMO_V2_SPEC.md](DEMO_V2_SPEC.md).
 
@@ -137,6 +137,6 @@ For sharing, User 2 builds `/evidence/${shareToken}` against the current browser
 
 ### Common product constraints
 
-No résumé builder. No fake endorsement or statistics. No “verified person” badge. The deterministic rubric controls the result. The LLM never grades or edits a receipt. Keep all six check observations visible. Preserve demo labels across the entire flow. No cloud fallback. No public deployment, remote creation, or push without explicit authorization.
+No resume builder. No fake endorsement or statistics. No “verified person” badge. The deterministic rubric controls the result. The LLM never grades or edits a receipt. Keep all six check observations visible. Preserve demo labels across the entire flow. No cloud fallback. No public deployment, remote creation, or push without explicit authorization.
 
 Use only the master rubric: uniqueness requires valid IDs; a valid unique subset can earn 20 but not coverage points; invented IDs earn zero; duplicate valid rows may pass field-fidelity checks but fail uniqueness/integrity; reference solution totals 1285.50 CAD. Never silently simplify these rules.

@@ -3,9 +3,34 @@ import { Icon } from "../components/icon";
 
 export default function HomePage() {
   return <>
-    <section className="shell hero career-hero"><div className="hero-copy"><p className="eyebrow"><span className="tiny-rule" /> SKILLRECEIPT</p><h1>Show what<br />you can <em>do.</em></h1><p className="hero-description">Start with your résumé. Test the skills you’ve listed. Let employers see the work behind your score.</p><div className="hero-actions"><Link className="button button-dark" href="/start">I’m looking for work<Icon name="arrow" size={18} /></Link><Link href="/employer" className="button button-outline">I’m hiring<Icon name="arrow" size={17} /></Link></div><p className="hero-footnote"><Icon name="check" size={14} />No sign-up required</p></div>
-    <div className="career-preview panel" aria-label="Illustrative assessment report"><div className="preview-heading"><span className="mono micro">ASSESSMENT REPORT</span><span className="tag">Example</span></div><span className="preview-role">JUNIOR DATA ENGINEER</span><div className="preview-score"><strong>80<span>/100</span></strong><span className="tag tag-green">3 of 4 checks passed</span></div><h2>See the skill. See the evidence.</h2><p>Each result includes the answers, scoring rules and session report.</p><div className="preview-checks"><span><Icon name="check" size={15} />Business keys<strong>20/20</strong></span><span><Icon name="check" size={15} />Data quality<strong>20/20</strong></span><span><Icon name="check" size={15} />Reliable loading<strong>20/20</strong></span><span className="preview-gap"><Icon name="arrow" size={15} />JavaScript basics<strong>20/40</strong></span></div><div className="preview-next"><span className="eyebrow">NEXT STEP</span><p>Practice handling missing order amounts. Run the four test cases to check your solution.</p></div><div className="preview-footer"><Icon name="file" size={15} />A specific exercise, with a report you can inspect.</div></div></section>
-    <section className="career-how shell" aria-label="How it works">{[{ n: "01", title: "Add your résumé", copy: "Get exercises suggested from the skills you’ve listed." }, { n: "02", title: "Put a skill to the test", copy: "Work through a short task with optional camera and session checks." }, { n: "03", title: "See your score", copy: "Understand every point and what you can improve." }, { n: "04", title: "Be found by employers", copy: "Publish your profile so employers can search your assessed skills." }].map((step) => <div key={step.n}><span className="mono micro">{step.n}</span><h2>{step.title}</h2><p>{step.copy}</p></div>)}</section>
-    <section className="shell employer-callout panel"><div><p className="eyebrow">FOR EMPLOYERS</p><h2>Go beyond a list of skills.</h2><p>Search by skill, name or candidate ID. Review the submitted work, score and session observations before starting a conversation.</p></div><Link className="button button-outline" href="/employer">Find talent<Icon name="arrow" size={17} /></Link></section>
+    <section className="shell hero career-hero">
+      <div className="hero-copy">
+        <p className="eyebrow"><span className="tiny-rule" /> SKILLRECEIPT</p>
+        <h1>Put your skills<br />to <em>work.</em></h1>
+        <p className="hero-description">Turn the skills on your resume into practical work samples. See how each result was scored, then choose whether to share it with employers.</p>
+        <div className="hero-actions">
+          <Link className="button button-dark" href="/start">Demonstrate my skills<Icon name="arrow" size={18} /></Link>
+          <Link href="/employer" className="button button-outline">Review candidate work<Icon name="arrow" size={17} /></Link>
+        </div>
+      </div>
+      <div className="career-preview panel" aria-label="Sample assessment report, not a personal result">
+        <div className="preview-heading"><span className="mono micro">ASSESSMENT REPORT</span><span className="tag">Sample</span></div>
+        <div className="preview-example-banner"><Icon name="info" size={15} /><span>SAMPLE RESULT · NOT YOUR SCORE</span></div>
+        <span className="preview-role">JUNIOR DATA ENGINEER</span>
+        <div className="preview-score"><strong>80<span>/100</span></strong><span className="tag tag-green">3 of 4 checks passed</span></div>
+        <h2>Review the work behind the score.</h2>
+        <p>This sample shows how a task, scoring evidence and improvement steps fit together.</p>
+        <div className="preview-checks"><span><Icon name="check" size={15} />Business keys<strong>20/20</strong></span><span><Icon name="check" size={15} />Data quality<strong>20/20</strong></span><span><Icon name="check" size={15} />Reliable loading<strong>20/20</strong></span><span className="preview-gap"><Icon name="arrow" size={15} />JavaScript basics<strong>20/40</strong></span></div>
+        <div className="preview-next"><span className="eyebrow">SUGGESTED PRACTICE</span><p>Handle missing order amounts, then run four test cases to check the solution.</p></div>
+        <div className="preview-footer"><Icon name="file" size={15} />An illustrative work sample and score report.</div>
+      </div>
+    </section>
+    <section className="career-how shell" aria-label="How SkillReceipt works">{[
+      { n: "01", title: "Add your resume", copy: "Use your listed skills to find relevant work samples." },
+      { n: "02", title: "Complete a work sample", copy: "Make role-related decisions and solve a practical task." },
+      { n: "03", title: "Review the evidence", copy: "See how each check was scored and what to practice next." },
+      { n: "04", title: "Choose what to share", copy: "Publish your results for employers when you are ready." },
+    ].map((step) => <div key={step.n}><span className="mono micro">{step.n}</span><h2>{step.title}</h2><p>{step.copy}</p></div>)}</section>
+    <section className="shell employer-callout panel"><div><p className="eyebrow">FOR EMPLOYERS</p><h2>Evaluate skills through work.</h2><p>Search candidate-published results, inspect submitted work and see how each task score was earned.</p></div><Link className="button button-outline" href="/employer">Explore candidate work<Icon name="arrow" size={17} /></Link></section>
   </>;
 }
