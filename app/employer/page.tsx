@@ -1,10 +1,13 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
-import { currentAccount } from "../../lib/server/account-http";
-import { EmployerSearch } from "../../components/employer-search";
-export const metadata: Metadata = { title: "Employer workspace", robots: { index: false, follow: false } };
+import { EmployerWorkspace } from "../../components/employer-workspace";
+import "../employer.css";
+
+export const metadata: Metadata = { title: "Find candidates", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
-export default async function EmployerPage() {
-  const account = await currentAccount(); if (!account) redirect("/login?role=employer"); if (account.role !== "employer") redirect("/dashboard");
-  return <div className="shell page-shell employer-page"><div className="page-heading"><div><p className="eyebrow">EMPLOYER WORKSPACE</p><h1>Look beyond the résumé.</h1><p className="page-lede">Find a candidate by ID. Review the work behind their score.</p></div><span className="tag">Signed in as {account.name}</span></div><EmployerSearch /></div>;
+
+export default async function EmployerPage({ searchParams }: { searchParams: Promise<{ candidate?: string; q?: string }> }) {
+  const params = await searchParams;
+  const candidate = typeof params.candidate === "string" && /^SR-[A-F0-9]{10}$/.test(params.candidate) ? params.candidate : "";
+  const query = typeof params.q === "string" ? params.q.slice(0, 100) : "";
+  return <div className="shell page-shell"><EmployerWorkspace key={`${candidate}:${query}`} initialCandidateId={candidate} initialQuery={query} /></div>;
 }

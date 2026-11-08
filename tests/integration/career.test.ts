@@ -45,7 +45,7 @@ test("résumé to role score and employer evidence", { timeout: 120_000 }, async
       const shared = await owner.json(`/api/receipts/${id}/share`, { enabled: true }); const { shareToken } = await shared.json();
       const response = await visitor.request(`/evidence/${shareToken}`); assert.equal(response.status, 200);
       const html = await response.text();
-      for (const expected of ["75", "Demo work sample", "Presentation demo", "CLIENT-REPORTED", "Schema validation"]) assert.ok(html.includes(expected), expected);
+      for (const expected of ["75", "Worked example", "Schema validation"]) assert.ok(html.includes(expected), expected);
       assert.ok(!html.includes("PRIVATE_APPLICANT") && !html.includes("Turn the gaps into a plan"));
       const evidence = await (await owner.request(`/api/receipts/${id}/download?format=json`)).json();
       assert.equal(evidence.fingerprint, fingerprint); assert.ok(!("id" in evidence) && !("shareToken" in evidence) && !("ownerHash" in evidence));

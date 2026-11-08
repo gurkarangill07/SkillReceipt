@@ -1,0 +1,76 @@
+.employer-workspace { padding-top: 18px; }
+.employer-intro { margin-bottom: 32px; max-width: 760px; }
+.employer-intro h1 { font-size: clamp(35px, 4.4vw, 54px); margin: 14px 0 20px; }
+.employer-intro > p:last-child { max-width: 630px; color: var(--muted); font-size: 16px; }
+.employer-filters { display: grid; grid-template-columns: minmax(250px, 1fr) 150px auto; gap: 17px; align-items: end; padding: 24px; }
+.employer-query { display: flex; gap: 12px; align-items: center; border: 1px solid #455b76; border-radius: 5px; background: var(--paper); padding: 11px 14px; min-height: 48px; }
+.employer-query svg { color: var(--muted); }
+.employer-query input { min-width: 0; width: 100%; background: transparent; border: 0; outline: 0; color: var(--ink); font-size: 14px; }
+.employer-query:focus-within { outline: 2px solid var(--forest); outline-offset: 2px; }
+.employer-score-filter { display: grid; gap: 7px; color: var(--muted); font-size: 12px; }
+.employer-score-filter select, .employer-report-picker select { width: 100%; min-width: 0; background: var(--paper); color: var(--ink); border: 1px solid #455b76; border-radius: 5px; min-height: 48px; padding: 11px 12px; font: inherit; }
+.employer-example-filter { grid-column: 1 / -1; display: inline-flex; align-items: center; gap: 9px; width: fit-content; color: var(--muted); font-size: 12px; }
+.employer-example-filter input { width: 15px; height: 15px; margin: 0; }
+.employer-results-label { display: flex; justify-content: space-between; align-items: center; gap: 20px; margin: 25px 0 17px; color: var(--muted); }
+.employer-loading { display: flex; align-items: center; gap: 12px; padding: 36px; color: var(--muted); font-size: 14px; }
+.employer-empty { display: flex; flex-direction: column; align-items: center; gap: 21px; padding: 52px 30px; text-align: center; }
+.employer-empty > svg { color: var(--forest); }
+.employer-empty h1, .employer-empty h2 { font-size: 28px; }
+.employer-empty > p { max-width: 530px; color: var(--muted); font-size: 14px; }
+.employer-empty > .button { margin-top: 3px; }
+.employer-candidates { display: grid; gap: 15px; }
+.employer-candidate { display: flex; align-items: center; justify-content: space-between; gap: 30px; padding: 26px; }
+.employer-candidate-main { min-width: 0; flex: 1; }
+.employer-candidate-heading { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.employer-avatar { display: grid; place-items: center; width: 43px; height: 43px; background: #1c304b; color: #b8d5ff; border: 1px solid #35506f; border-radius: 50%; font-size: 14px; font-weight: 600; }
+.employer-candidate-heading h2 { font-size: 23px; margin-bottom: 5px; overflow-wrap: anywhere; }
+.employer-candidate-heading > .tag { margin-left: auto; }
+.employer-tested-skills { display: flex; flex-wrap: wrap; gap: 7px; margin: 19px 0 13px; align-items: center; }
+.employer-candidate-score { flex: 0 0 185px; text-align: right; }
+.employer-candidate-score > strong { display: block; font-size: 34px; font-weight: 550; line-height: 1.15; letter-spacing: -.05em; }
+.employer-candidate-score > strong > span { color: var(--muted); font-size: 14px; font-weight: 400; letter-spacing: 0; margin-left: 3px; }
+.employer-candidate-score > p { margin: 6px 0 15px; }
+.employer-directory-note { margin-top: 28px; max-width: 780px; }
+.employer-back { margin-bottom: 24px; }
+.employer-report-profile { display: flex; justify-content: space-between; align-items: center; gap: 25px; padding: 30px; margin-bottom: 20px; }
+.employer-report-profile h1 { margin: 12px 0; font-size: clamp(32px, 4vw, 44px); overflow-wrap: anywhere; outline: none; }
+.employer-report-profile-facts { display: grid; gap: 10px; justify-items: end; }
+.employer-resume-context { padding: 19px 23px; margin-bottom: 24px; }
+.employer-resume-context summary { font-size: 14px; }
+.employer-resume-context summary > span { margin-left: 15px; }
+.employer-resume-context > p { margin-top: 15px; overflow-wrap: anywhere; }
+.employer-report-picker { display: grid; grid-template-columns: 100px minmax(0, 1fr); gap: 20px; align-items: center; margin: 28px 0; }
+.employer-report-picker > label { font-size: 13px; color: var(--muted); }
+.employer-report-picker select { font-size: 14px; text-overflow: ellipsis; }
+.employer-report-meta { display: flex; gap: 18px; justify-content: space-between; align-items: center; margin: 28px 0 20px; }
+.employer-report-meta .eyebrow { color: #b8d5ff; }
+@media (max-width: 900px) {
+  .employer-filters { grid-template-columns: minmax(0, 1fr) 140px; }
+  .employer-filters > button { grid-column: 1 / -1; width: fit-content; }
+}
+@media (max-width: 600px) {
+  .employer-workspace { padding-top: 5px; }
+  .employer-intro { margin-bottom: 24px; }
+  .employer-intro h1 { font-size: 35px; }
+  .employer-intro > p:last-child { font-size: 14px; }
+  .employer-filters { grid-template-columns: 1fr; padding: 20px; gap: 16px; }
+  .employer-query input { font-size: 13px; }
+  .employer-filters > button { width: 100%; }
+  .employer-score-filter { grid-template-columns: 1fr 135px; align-items: center; }
+  .employer-example-filter { font-size: 12px; }
+  .employer-results-label { align-items: flex-start; }
+  .employer-candidate { flex-direction: column; align-items: stretch; padding: 22px; gap: 22px; }
+  .employer-candidate-heading { gap: 11px; }
+  .employer-candidate-heading h2 { font-size: 22px; }
+  .employer-candidate-heading > .tag { margin-left: 0; }
+  .employer-candidate-score { flex-basis: auto; text-align: left; display: grid; grid-template-columns: 1fr auto; align-items: center; column-gap: 10px; border-top: 1px solid var(--line); padding-top: 18px; }
+  .employer-candidate-score > strong { font-size: 29px; }
+  .employer-candidate-score > p { font-size: 11px; margin: 5px 0 0; }
+  .employer-candidate-score > button { grid-column: 2; grid-row: 1 / 3; }
+  .employer-empty { padding: 38px 22px; }
+  .employer-report-profile { align-items: flex-start; flex-direction: column; padding: 24px; gap: 20px; }
+  .employer-report-profile-facts { justify-items: start; }
+  .employer-report-picker { grid-template-columns: 1fr; gap: 9px; }
+  .employer-report-meta { align-items: flex-start; flex-direction: column; gap: 8px; }
+  .employer-resume-context { padding: 18px 20px; }
+}

@@ -1,18 +1,28 @@
-# SkillReceipt: a simple three-minute demonstration
+# Two-minute demo
 
-**Pitch:** “Upload your résumé, choose a role, show a little real work, then share the evidence behind your score.”
+Open http://localhost:3000 in a fresh browser session. No accounts, keys or prepared users are required.
 
-Prepare one candidate account and a separate employer account using **Create an account** on the sign-in screen. Use different emails and passwords of at least ten characters. Use a synthetic résumé, not a real applicant's personal data. Accounts and results persist in this local installation; no accounts or passwords are shipped in source.
+**Pitch:** “A résumé lists skills. SkillReceipt suggests a practical task, shows the evidence behind the score, and lets employers review that work.”
 
-1. **Candidate workspace, 20 seconds.** Show the dark dashboard and stable Candidate ID. Select **Add résumé**, upload a short TXT/PDF/DOCX file, and explain that keywords provide context and never earn points. The sample résumé shortcut does not save a downloadable file; use an actual synthetic upload to demonstrate employer downloads.
-2. **Find a role, 20 seconds.** Continue to role search, type **Junior Data Engineer**, and open the assessment. There are two supported roles in this prototype.
-3. **A focused task, 40 seconds.** Show **Start my work sample**, select Practice, acknowledge the session conditions, and begin. Answer Order ID, Quarantine for review, and Upsert by the business key. Each question appears on its own, followed by a small JavaScript task. Show the example and **Run tests**. The starter function returns zero and passes two of four cases.
-4. **A useful result, 35 seconds.** Finish with the starter code to receive **80/100**: three decision checks pass and coding earns 20/40. Show the published tests and the candidate's concrete coding improvement plan. A new attempt with a correct loop earns 100; the **Demo helper** can load the example and keeps the attempt labeled demo.
-5. **Employer review, 40 seconds.** Return to the candidate dashboard, enable **Employer profile access**, and copy the Candidate ID. Sign out, select **For employers**, sign into the prepared employer account and search that ID. Show the résumé download, actual score and expandable check evidence. Private coaching and account email are excluded; any contact details in the résumé remain part of that file.
-6. **Candidate control, 15 seconds.** Explain that the candidate can disable profile access to block new lookups/downloads. Public receipt links have their own revoke controls. Scores describe a particular work sample; identity, employer organizations and independent authorship are not verified.
+1. **Start with a résumé — 20 seconds.** Choose **I’m looking for work**. Enter a name, select **Use a sample résumé**, then **Find my exercises**. The sample goes through the real parser. Point out the recognized JavaScript, SQL, Python and ETL keywords.
+2. **Follow the recommendation — 10 seconds.** Open **Junior Data Engineer** from the suggestions. Its card explains why it matches the résumé. The résumé itself earns no points.
+3. **Show a useful result — 30 seconds.** Select **Try an 80-point example**, then **Get my receipt**. Show the 80/100 score, three successful decisions, partial JavaScript credit, submitted code and next steps. The example label stays visible; camera/session monitoring is off for a worked example.
+4. **Let employers find it — 15 seconds.** Select **Publish profile for employers**, read the publication summary, then **View as an employer**. This connects the completed report to the same Candidate ID without a login.
+5. **Review the evidence — 35 seconds.** Search **JavaScript**. Open the candidate and inspect the 20/40 coding evidence, per-case outcomes and full submitted code. The score is for this exercise, not all JavaScript ability. Show the session report and the résumé keyword summary separately; employers do not receive a raw résumé file or private coaching plan.
+6. **Show candidate control — 10 seconds.** Return to the private result or **My results** and choose **Hide from employer search**. A fresh employer search/report request can no longer retrieve the profile. Individual shared receipt links have their own revoke control.
 
-For a very short pitch, **Presenter demo · sample attempt** on the brief skips to review, uses no camera and yields the same 80-point improvement story. Its demo label remains visible in the result and employer evidence. The coding page is accessible through **Review my code**.
+## Add a live camera demonstration
 
-Camera mode uses an explicit permission button and a local preview. It counts only this page's visibility changes; it does not inspect other tabs or guarantee that someone cannot cheat. Rehearse hardware permission and return-from-hidden behavior on the presentation device before choosing camera mode. No Ollama setup is required for the deterministic results and improvement plan.
+Allow an extra minute or two and rehearse the presentation device's camera permission first.
 
-Run `npm ci` then `npm run dev`, and open http://localhost:3000. If Turbopack's local compiler is restricted by the host, use `npm run dev -- --webpack`. For a built preview, use `npm run build -- --webpack` then `npm start`.
+1. Start a fresh Data Engineer attempt with **Start challenge**. In **Session checks**, acknowledge the observations, choose **Camera session**, explicitly **Enable camera preview**, then **Begin test**. There is no automatic camera access or recording.
+2. Optionally select **Use full screen**. Move away from the test tab/window to show the pause, then return and **Resume test**. A stopped/interrupted camera requires reconnecting or an explicit switch to practice. Session observations do not deduct points.
+3. Answer **Order ID**, **Quarantine for review**, and **Upsert by the business key**. On the coding task, run the starter to show 2/4 cases. Submit the unchanged starter for 80/100 and inspect the session observations in its report. Loading the worked solution would label this attempt as an example.
+
+If permission is unavailable, select **Practice without camera**. That attempt is clearly reported as practice. Automated camera checks use a fake media device; they do not verify the presenter's physical camera.
+
+## Optional breadth
+
+Use **Browse all exercises** to show QA, Frontend, Product Analytics, Cybersecurity and Data Analysis. Product Analytics' worked example demonstrates 10% control conversion, 12.5% variant conversion, 2.5 percentage points of absolute increase and 25% relative uplift. All six work samples can be submitted and reviewed.
+
+Session observations are browser-reported context, not proof that cheating is impossible. Results are evidence about a specific task, not identity verification or certification. Local links require access to this server. Vercel deployment still needs durable shared storage.

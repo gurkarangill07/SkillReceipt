@@ -2,6 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  devIndicators: false,
   serverExternalPackages: ["unpdf", "mammoth", "quickjs-emscripten"],
   async headers() {
     return [

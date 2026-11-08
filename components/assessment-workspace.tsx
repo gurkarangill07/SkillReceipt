@@ -6,6 +6,7 @@ import type { DataRow } from "../lib/contracts";
 import { clearDraft, createDemoDraft, createSourceDraft, readDraft, saveDraft, snapshotSubmission, type Draft } from "../lib/client/draft";
 import { isRecord, postJson } from "../lib/client/http";
 import { Icon } from "./icon";
+import { AssessmentSession, useAssessmentSession } from "./assessment-session";
 
 const columns: { field: keyof DataRow; label: string; limit: number }[] = [
   { field: "orderId", label: "Order ID", limit: 40 },
@@ -20,13 +21,13 @@ export function AssessmentWorkspace({ startFresh = false }: { startFresh?: boole
   const [ready, setReady] = useState(false);
   const [storageMessage, setStorageMessage] = useState("Preparing your workspace…");
   const [draftMessage, setDraftMessage] = useState("");
-  const [acknowledged, setAcknowledged] = useState(false);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
   const [replaceAction, setReplaceAction] = useState<"source" | "demo" | null>(null);
   const submitLock = useRef(false);
   const initialized = useRef(false);
   const errorRef = useRef<HTMLDivElement>(null);
+  const session = useAssessmentSession({ enabled: ready, demo: draft.demo });
 
   useEffect(() => {
     if (initialized.current) return;
@@ -77,19 +78,17 @@ export function AssessmentWorkspace({ startFresh = false }: { startFresh?: boole
       setDraft((current) => createDemoDraft(current));
       setDraftMessage("Demo solution loaded. Editing it will keep this attempt labeled as a demo.");
     }
-    setAcknowledged(false);
     setError("");
     setReplaceAction(null);
   }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (submitLock.current || !ready) return;
+    if (submitLock.current || !ready || !session.canSubmit()) return;
     setError("");
     if (retained.length === 0) { setError("Restore at least one row before submitting. An empty artifact cannot be assessed."); return; }
     if (draft.total.length === 0) { setError("Enter your stated total revenue in CAD. A semantically incorrect answer can still be submitted and assessed."); return; }
-    if (!acknowledged) { setError("Acknowledge the assessment scope before submitting."); return; }
-    const snapshot = snapshotSubmission(draft);
+    const snapshot = { ...snapshotSubmission(draft), session: session.snapshot() };
     submitLock.current = true;
     setPending(true);
     try {
@@ -98,6 +97,7 @@ export function AssessmentWorkspace({ startFresh = false }: { startFresh?: boole
         throw new Error("The server did not confirm a new receipt. Check My receipts before submitting again.");
       }
       // The editor stays locked until navigation; the persisted artifact is exactly snapshot.
+      session.finish();
       router.push(`/receipts/${result.body.id}`);
       router.refresh();
     } catch (failure) {
@@ -113,8 +113,10 @@ export function AssessmentWorkspace({ startFresh = false }: { startFresh?: boole
     <p className="draft-status micro" role="status"><Icon name="lock" size={13} />{storageMessage}</p>
     {draftMessage && <p className="notice notice-neutral" role="status">{draftMessage}</p>}
     {draft.demo && <div className="notice notice-demo" role="status"><Icon name="info" /><div><strong>Demo attempt — reference solution loaded</strong><p>This is a walkthrough. Every receipt from this draft keeps its demo label, even after edits. Reset to the source to start a normal attempt.</p></div></div>}
-    <form onSubmit={submit} noValidate>
-      <fieldset disabled={!ready || pending} className="workspace-fieldset" aria-busy={pending}>
+    <AssessmentSession checks={session} />
+    {ready && !session.started && <div className="session-example-shortcut"><button type="button" className="text-button" onClick={() => replaceDraft("demo")}>Load worked example</button><p className="micro muted">Replaces the table with a completed example. The receipt will be labeled.</p></div>}
+    {session.started && <form onSubmit={submit} noValidate>
+      <fieldset disabled={!ready || pending || session.paused} className="workspace-fieldset" aria-busy={pending}>
         <legend className="sr-only">Sales cleanup submission</legend>
         <div className="editor-layout">
           <div className="editor-main">
@@ -135,11 +137,11 @@ export function AssessmentWorkspace({ startFresh = false }: { startFresh?: boole
             {removed.length > 0 && <details className="removed-rows panel" open><summary>{removed.length} removed {removed.length === 1 ? "row" : "rows"} <span className="muted">· excluded from submission</span></summary><ul>{removed.map((row) => { const number = draft.rows.findIndex((candidate) => candidate.key === row.key) + 1; return <li key={row.key}><span><span className="mono muted">Row {number}</span><strong>{row.value.orderId || "Blank ID"}</strong><span className="muted removed-value">{row.value.revenue || "Missing revenue"}</span></span><button type="button" className="text-button" onClick={() => toggleRow(row.key)} aria-label={`Restore row ${number}, order ${row.value.orderId || "blank ID"}`}><Icon name="refresh" size={14} />Restore</button></li>; })}</ul></details>}
             <div className="draft-actions"><button className="text-button" type="button" onClick={() => setReplaceAction("source")}><Icon name="refresh" size={15} />Reset to source</button><button className="text-button" type="button" onClick={() => setReplaceAction("demo")}><Icon name="spark" size={15} />Load demo solution</button></div>
             {replaceAction && <div className="notice notice-neutral replace-confirm" role="group" aria-label="Confirm draft replacement"><p>{replaceAction === "source" ? "Replace this draft with the original source? Current edits, personal fields, and demo status will be cleared." : "Replace the table and total with the reference solution? This attempt will be labeled as a demo, including after further edits."}</p><div className="button-row"><button type="button" className="button button-dark button-small" onClick={() => replaceDraft(replaceAction)}>{replaceAction === "source" ? "Reset draft" : "Load labeled demo"}</button><button type="button" className="button button-outline button-small" onClick={() => setReplaceAction(null)}>Keep editing</button></div></div>}
-            <section className="personal-fields panel" aria-labelledby="context-title"><p className="eyebrow">OPTIONAL CONTEXT</p><h3 id="context-title">Add a little context.</h3><p className="muted small">Neither field affects your score. If you enable sharing later, both fields are visible to anyone with the link.</p><label htmlFor="display-name">Display name <span className="label-note">· self-reported, optional</span></label><input id="display-name" className="text-input" value={draft.displayName} maxLength={60} autoComplete="off" onChange={(event) => setDraft((current) => ({ ...current, displayName: event.target.value }))} placeholder="How you'd like to be named" /><label htmlFor="reflection">Your reflection <span className="label-note">· unassessed, optional</span></label><textarea id="reflection" className="text-input" rows={4} maxLength={1500} value={draft.reflection} placeholder="What did you change? What would you check next?" onChange={(event) => setDraft((current) => ({ ...current, reflection: event.target.value }))} /><span className="character-count micro muted">{draft.reflection.length} / 1,500 characters</span></section>
+
           </div>
-          <aside className="submit-panel panel" aria-labelledby="submit-title"><span className="step-stamp mono">03 / WHEN YOU'RE READY</span><h3 id="submit-title">Reconcile.<br />Then make it a receipt.</h3><p className="small muted">Enter the total for your retained orders. Your exact submitted cells and total will be saved as a separate result.</p><label htmlFor="total">Total revenue</label><div className="money-input"><span className="mono">CAD</span><input id="total" value={draft.total} inputMode="decimal" autoComplete="off" maxLength={40} aria-describedby="total-help" onChange={(event) => setDraft((current) => ({ ...current, total: event.target.value }))} placeholder="0.00" /></div><p className="micro muted" id="total-help">Plain decimal only, up to two decimal places. No currency symbols, commas, or spaces.</p><div className="submit-facts"><span>Retained orders<strong>{retained.length}</strong></span><span>Removed rows<strong>{removed.length}</strong></span><span>Assessment<strong>{draft.demo ? "Demo attempt" : "Source attempt"}</strong></span></div><label className="checkbox-label"><input type="checkbox" checked={acknowledged} onChange={(event) => setAcknowledged(event.target.checked)} /><span>I understand this checks my submitted output for this task. It does not verify identity or independent authorship.</span></label>{error && <div className="notice notice-error" role="alert" tabIndex={-1} ref={errorRef}>{error}<a href="/receipts" className="inline-error-link">Open My receipts</a></div>}<button className="button button-dark submit-button" type="submit" disabled={!ready || pending}>{pending ? <><span className="spinner" />Checking your submission…</> : <>Submit & get receipt<Icon name="arrow" size={17} /></>}</button><p className="micro muted submit-note" role="status">{pending ? "Your submitted snapshot is frozen. Please wait for the server's result." : "Private by default. No score is calculated in your browser."}</p></aside>
+          <aside className="submit-panel panel" aria-labelledby="submit-title"><span className="step-stamp mono">03 / WHEN YOU'RE READY</span><h3 id="submit-title">Reconcile.<br />Then make it a receipt.</h3><p className="small muted">Enter the total for your retained orders. Your exact submitted cells and total will be saved as a separate result.</p><label htmlFor="total">Total revenue</label><div className="money-input"><span className="mono">CAD</span><input id="total" value={draft.total} inputMode="decimal" autoComplete="off" maxLength={40} aria-describedby="total-help" onChange={(event) => setDraft((current) => ({ ...current, total: event.target.value }))} placeholder="0.00" /></div><p className="micro muted" id="total-help">Plain decimal only, up to two decimal places. No currency symbols, commas, or spaces.</p><div className="submit-facts"><span>Retained orders<strong>{retained.length}</strong></span><span>Removed rows<strong>{removed.length}</strong></span><span>Assessment<strong>{draft.demo ? "Demo attempt" : "Source attempt"}</strong></span></div>{error && <div className="notice notice-error" role="alert" tabIndex={-1} ref={errorRef}>{error}<a href="/receipts" className="inline-error-link">Open My receipts</a></div>}<button className="button button-dark submit-button" type="submit" disabled={!ready || pending}>{pending ? <><span className="spinner" />Checking your submission…</> : <>Submit & get receipt<Icon name="arrow" size={17} /></>}</button><p className="micro muted submit-note" role="status">{pending ? "Your submitted snapshot is frozen. Please wait for the server's result." : "Private by default. No score is calculated in your browser."}</p></aside>
         </div>
       </fieldset>
-    </form>
+    </form>}
   </section>;
 }

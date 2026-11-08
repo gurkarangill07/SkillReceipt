@@ -1,3 +1,56 @@
+# Résumé-to-employer revision — November 7, 2026
+
+This record describes the current app. Earlier guest-catalog and account-portal results below are historical.
+
+## Verification completed
+
+- Type checking passed.
+- Unit tests: **95 passed, 0 failed**.
+- Production build: passed.
+- Real HTTP integration: **31 passed, 0 failed**, including the new résumé/profile → assessed work → employer publication/search/report → revocation journey, owner isolation and process-restart persistence.
+- Full Chromium production browser journey: actual TXT upload and keyword extraction; résumé-based ranking; six-exercise browsing and empty search; consented simulated-camera QA attempt scoring 90/100; feedback; candidate opt-in; employer skill search and detailed report; private-plan exclusion; separate-context public link; link and directory revocation. All six worked examples submitted successfully. Desktop and 390px mobile layouts had no horizontal overflow or uncaught page errors.
+- Dedicated camera production browser checks: consent before access; video-only constraints with no audio track; rendered preview with nonzero video width; tab/focus pause and answer blocking; resume; paste count without clipboard data; camera mute and reconnect; fullscreen-exit pause; camera cleanup after submission/navigation; denied-permission practice fallback; and late permission resolution after navigation.
+- Visually inspected the actual desktop résumé form, employer report, camera screen and phone résumé form. Screenshots are in ignored `test-results/`.
+- Diff whitespace check: passed.
+
+## Evidence and scope
+
+Camera tests use Chromium's fake video device and simulated permission/focus events where needed. They do not verify the PC's physical camera or establish independent authorship. The UI reports observations rather than a cheating verdict, and never calls the result a certification.
+
+No raw résumé bytes/text, video, audio or clipboard contents are persisted. Candidate profile publication starts private. Public reports include actual assessed work and disclosed session context, while private receipt capabilities and owner secrets remain excluded. Example answers are requested explicitly and the normal UI preserves their label; this local, anonymous prototype is not resistant to a determined caller altering requests or browser-reported signals.
+
+The app remains local, with a single-process file repository. Durable shared storage is required before a Vercel deployment. No deployment is claimed.
+
+---
+
+## Earlier revisions
+
+# Guest hackathon revision — November 7, 2026
+
+Current product scope: [HACKATHON.md](HACKATHON.md). Older portal/account records below are historical and do not describe the current interface.
+
+## Verified in this workspace
+
+- `npm run typecheck`: passed.
+- `npm test`: **81 passed, 0 failed**, including every new domain's full and partial scores, invalid input, versioned persistence, fingerprints, owner separation, sharing and revocation.
+- `npm run build`: passed with the committed dependency lockfile and installed Node 24.
+- `npm run test:e2e`: **24 passed, 0 failed** against real isolated Next production servers. Covers unauthenticated challenge pages, disabled registration/login, actual JavaScript execution, server-owned scoring, scenario owner/shared pages, CSV/JSON exports, access control, revocation and process-restart persistence. Existing sales, parser and compatibility-coach checks also pass.
+- Playwright/Chromium desktop and mobile smoke: passed across all six challenge types. Verified catalog filtering, an actual imperfect QA attempt (90), all four scenario examples (100), engineering example (80), sales example (100), public share in a separate browser context, revocation, source-material visibility on mobile and no page-level horizontal overflow. No uncaught page errors.
+- Visually inspected desktop home/catalog and mobile Product Analytics exercise screenshots. Captures are under ignored `test-results/`.
+- `git diff --check`: passed.
+
+## Fixes found during verification
+
+The Windows HTTP harness now skips `.next/dev` and cache files, dereferences build-time dependency links, and uses a junction for the temporary server's node_modules. Product fixes include preserving source visibility on phone layouts, removing old sign-in instructions from unavailable receipts, and consistent role titles in shared views.
+
+## Remaining scope
+
+The app is local and uses a single-process file store. Durable shared storage is still required before Vercel deployment. Browser smoke is not an exhaustive accessibility audit. Real camera/proctoring checks are irrelevant to this revision because that interface has been removed. No public deployment is claimed.
+
+---
+
+## Historical validation records
+
 # Dark portals and coding revision: actual validation
 
 Date: November 7, 2026. Local branch `feat/dark-portals-coding`, based on `d9b5662`. Scope: [DARK_PORTALS_SPEC.md](DARK_PORTALS_SPEC.md). This section supersedes earlier status below.

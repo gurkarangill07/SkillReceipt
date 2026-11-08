@@ -82,10 +82,11 @@ export async function startIsolatedApp() {
   }
   try {
     await cp(path.join(root, ".next"), path.join(sandbox, ".next"), {
-      recursive: true, filter: (source) => !source.startsWith(path.join(root, ".next/cache")),
+      recursive: true, dereference: true,
+      filter: (source) => !["cache", "dev"].some((name) => source === path.join(root, ".next", name) || source.startsWith(path.join(root, ".next", name) + path.sep)),
     });
     await cp(path.join(root, "package.json"), path.join(sandbox, "package.json"));
-    await symlink(path.join(root, "node_modules"), path.join(sandbox, "node_modules"), "dir");
+    await symlink(path.join(root, "node_modules"), path.join(sandbox, "node_modules"), process.platform === "win32" ? "junction" : "dir");
     for (const name of await readdir(root)) {
       if (name === "public" || /^next\.config\.(mjs|js|ts|cjs)$/.test(name)) {
         await cp(path.join(root, name), path.join(sandbox, name), { recursive: true });

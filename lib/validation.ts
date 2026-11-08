@@ -1,5 +1,6 @@
 import type { DataRow, PipelineWork, SessionContext, Submission } from "./contracts";
 import { PIPELINE_TASKS } from "./career";
+import { getScenario } from "./scenarios";
 
 export class InputError extends Error {}
 export const MAX_BODY_BYTES = 65_536;
@@ -11,11 +12,45 @@ const text = (value: unknown, label: string, max: number, nonempty = false): str
   return value;
 };
 
+export function parseSession(value: unknown): SessionContext {
+  if (!isRecord(value) || typeof value.mode !== "string" || !["camera", "practice", "presentation"].includes(value.mode) || typeof value.cameraStarted !== "boolean") throw new InputError("Choose a supported session mode.");
+  const count = (key: string, optional = false): number | undefined => {
+    const number = value[key];
+    if (optional && number === undefined) return undefined;
+    if (typeof number !== "number" || !Number.isInteger(number) || number < 0 || number > 86_400) throw new InputError("Session counts must be bounded nonnegative integers.");
+    return number;
+  };
+  if (value.mode === "camera" && !value.cameraStarted) throw new InputError("Start the camera before submitting a camera session.");
+  if (value.fullscreenStarted !== undefined && typeof value.fullscreenStarted !== "boolean") throw new InputError("Fullscreen status must be a boolean.");
+  return { mode: value.mode as SessionContext["mode"], cameraStarted: value.cameraStarted, tabSwitches: count("tabSwitches")!, interruptions: count("interruptions")!, activeSeconds: count("activeSeconds")!,
+    ...(value.focusLosses !== undefined ? { focusLosses: count("focusLosses", true)! } : {}),
+    ...(value.pasteEvents !== undefined ? { pasteEvents: count("pasteEvents", true)! } : {}),
+    ...(value.fullscreenExits !== undefined ? { fullscreenExits: count("fullscreenExits", true)! } : {}),
+    ...(value.fullscreenStarted !== undefined ? { fullscreenStarted: value.fullscreenStarted } : {}) };
+}
+
 export function parseSubmission(value: unknown): Submission {
   if (!isRecord(value)) throw new InputError("Submit a JSON object containing rows and a CAD total.");
+  const session = value.session === undefined ? undefined : parseSession(value.session);
+  const sessionFields = session ? { session } : {};
+  if (value.scenario !== undefined) {
+    if (value.workSample !== undefined) throw new InputError("Submit one challenge at a time.");
+    const work = value.scenario;
+    if (!isRecord(work) || work.kind !== "scenario-v1" || typeof work.roleId !== "string" || !isRecord(work.answers)) throw new InputError("Choose a supported challenge.");
+    const scenario = getScenario(work.roleId);
+    if (!scenario) throw new InputError("Choose a supported challenge.");
+    const answers: Record<string, string> = {};
+    for (const field of [...scenario.questions, ...scenario.exercise]) {
+      const answer = text(work.answers[field.id], field.label, 100, true);
+      if (field.options && !field.options.some((option) => option.value === answer)) throw new InputError(`Choose an option for ${field.label}.`);
+      answers[field.id] = answer;
+    }
+    if (value.demo !== undefined && typeof value.demo !== "boolean") throw new InputError("The demo marker must be a boolean.");
+    return { rows: [], total: "", displayName: "", reflection: "", demo: value.demo === true || session?.mode === "presentation", scenario: { kind: "scenario-v1", roleId: scenario.id, answers }, ...sessionFields };
+  }
   if (value.workSample !== undefined) {
     const work = value.workSample;
-    if (!isRecord(work) || !["data-pipeline-v1", "data-engineer-v2"].includes(String(work.kind)) || !isRecord(work.answers) || !isRecord(work.session)) throw new InputError("Provide a supported work sample and session context.");
+    if (!isRecord(work) || typeof work.kind !== "string" || !["data-pipeline-v1", "data-engineer-v2"].includes(work.kind) || !isRecord(work.answers) || !isRecord(work.session)) throw new InputError("Provide a supported work sample and session context.");
     const answers = {} as PipelineWork["answers"];
     for (const task of PIPELINE_TASKS) {
       if (work.kind === "data-engineer-v2" && !["key", "missing", "load"].includes(task.id)) continue;
@@ -23,18 +58,11 @@ export function parseSubmission(value: unknown): Submission {
       if (typeof answer !== "string" || !task.options.some((option) => option.value === answer)) throw new InputError(`Choose an answer for ${task.label}.`);
       answers[task.id] = answer;
     }
-    const session = work.session;
-    if (!["camera", "practice", "presentation"].includes(String(session.mode)) || typeof session.cameraStarted !== "boolean") throw new InputError("Choose a supported session mode.");
-    const count = (key: string) => {
-      const number = session[key];
-      if (typeof number !== "number" || !Number.isInteger(number) || number < 0 || number > 86_400) throw new InputError("Session counts must be bounded nonnegative integers.");
-      return number;
-    };
-    if (session.mode === "camera" && !session.cameraStarted) throw new InputError("A camera-mode session must report that its camera started.");
-    const context: SessionContext = { mode: session.mode as SessionContext["mode"], cameraStarted: session.cameraStarted, tabSwitches: count("tabSwitches"), interruptions: count("interruptions"), activeSeconds: count("activeSeconds") };
+    const context = parseSession(work.session);
+    if (session && JSON.stringify(session) !== JSON.stringify(context)) throw new InputError("Session details must agree with the work sample.");
     if (value.demo !== undefined && typeof value.demo !== "boolean") throw new InputError("The demo marker must be a boolean.");
     const code = work.kind === "data-engineer-v2" ? text(work.code, "JavaScript code", 5000, true) : undefined;
-    return { rows: [], total: "", displayName: value.displayName === undefined ? "" : text(value.displayName, "Display name", 60), reflection: value.reflection === undefined ? "" : text(value.reflection, "Reflection", 1500), demo: value.demo === true || context.mode === "presentation", workSample: { kind: work.kind as PipelineWork["kind"], answers, session: context, ...(code !== undefined ? { code } : {}) } };
+    return { rows: [], total: "", displayName: value.displayName === undefined ? "" : text(value.displayName, "Display name", 60), reflection: value.reflection === undefined ? "" : text(value.reflection, "Reflection", 1500), demo: value.demo === true || context.mode === "presentation", workSample: { kind: work.kind as PipelineWork["kind"], answers, session: context, ...(code !== undefined ? { code } : {}) }, ...sessionFields };
   }
   if (!Array.isArray(value.rows) || value.rows.length < 1 || value.rows.length > 30) {
     throw new InputError("Submit between 1 and 30 rows.");
@@ -53,7 +81,7 @@ export function parseSubmission(value: unknown): Submission {
     rows, total: text(value.total, "Total revenue", 40, true),
     displayName: value.displayName === undefined ? "" : text(value.displayName, "Display name", 60),
     reflection: value.reflection === undefined ? "" : text(value.reflection, "Reflection", 1500),
-    demo: value.demo ?? false,
+    demo: value.demo === true || session?.mode === "presentation", ...sessionFields,
   };
 }
 

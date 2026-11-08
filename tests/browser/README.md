@@ -1,25 +1,33 @@
-> Current dark-portal revision: native Brave screenshots verified candidate sign-in and dashboard with synthetic local data. Browser control then timed out before the challenge; full mobile/camera and remaining interaction checks are still unverified. See [VALIDATION.md](../../docs/VALIDATION.md).
+# Browser checks
 
-> Revised role-led flow: native Brave verified the résumé sample and role-selection interaction. Full camera/tab-return/keyboard/mobile/device QA remains unverified after browser-control interruption. Current results: [VALIDATION.md](../../docs/VALIDATION.md). The original checklist below applies to the retained Analyst flow.
+Two Playwright/Chromium scripts exercise the working app:
 
-# Browser acceptance record
+| Script | Scope |
+| --- | --- |
+| `demo-smoke.mjs` | Résumé upload/sample, recommendations, assessment results, candidate publication, employer search and detailed reports, downloads/sharing, example labels, and desktop/mobile layouts |
+| `session-smoke.mjs` | Explicit camera consent, local preview, pause/resume, camera interruption/reconnect, paste observations, optional fullscreen exit, practice fallback and media cleanup |
 
-Status: **partial integrated desktop inspection on November 7, 2026**. Native Brave loaded the actual production landing and assessment pages. The landing screenshot was visually inspected in chat; assessment accessibility showed the exact source, controls, labels and brief. Browser access was unstable and a manual cell interaction/state refresh was interrupted, so full editing/submission/sharing/coach/keyboard/console/mobile verification remains unrun. No local PNG artifacts are claimed.
+Session automation uses a **fake media device**, injected focus/paste events where headless browsers need them, and simulated permission errors. It does not verify a physical camera or establish that the assessment is cheating-proof. See [docs/VALIDATION.md](../../docs/VALIDATION.md) for observed results and remaining limits.
 
-HTTP acceptance passes on the combined app, but HTTP is not browser verification. User 2's separate fixture-browser results also do not count as integrated interactive acceptance. Complete the checklist below when stable browser access is available. No browser framework was installed for this merge.
+## Run
 
-## Interaction checklist for the integrated app
+Use an installed Playwright package and Chromium. If Playwright is outside this checkout, set `PLAYWRIGHT_MODULE` to its package directory; an existing Chromium binary can be selected with `PLAYWRIGHT_CHROMIUM_EXECUTABLE`.
 
-- At desktop and approximately 390 px width, inspect landing/assessment/private receipt/public evidence. Record page titles, keyboard focus, contrast, readable failure states, and contained table scrolling.
-- Start the challenge, read all six rules, edit one cell using the keyboard, remove/restore a row, and enter a CAD total. Confirm slash dates are explicitly month/day/year.
-- Refresh and verify draft restoration. Put malformed/wrong-version draft data in localStorage and check safe recovery. Test reset and its confirmation if provided.
-- Submit an imperfect attempt: change only R001's date to `2026-10-02` in an otherwise correct artifact. Expect 80/100 with the date check failed and the affected order explained.
-- Load the demo solution, observe its demo label, submit it, and verify 100/100 with all six checks passed and the exact submitted table. Confirm the demo label persists in private receipt, evidence, list, and JSON download.
-- Confirm sharing is off initially. Read the disclosure, enable, test copy and its selectable fallback, then open the employer view in a separate session without owner cookies.
-- Download CSV/JSON and inspect their contents; revoke sharing and make a fresh request to the old link. Owner access must continue. Re-enable and observe a different link.
-- Start a retry and verify the old receipt is unchanged. Check My receipts includes both imperfect and successful attempts.
-- Request local practice advice explicitly. Verify loading, success, error, cooldown, and disabled-button explanations. Advice must be visually separate, text-only, marked “AI-generated practice advice · not assessed,” and absent from public evidence and downloads.
-- Simulate coach HTTP 503/offline. Confirm useful deterministic feedback and fully usable scoring/sharing/downloads. All-pass advice must suggest another exercise.
-- Inspect runtime/browser-console errors, live-region announcements, skip link, labels, and keyboard access. Confirm no page-level horizontal overflow at mobile size.
+Build first, then run the candidate/employer checks:
 
-Record actual browser/surface, date, viewports, interactions, failures/fixes, and screenshot paths in `docs/VALIDATION.md`. Do not mark this list complete before observing each outcome.
+```powershell
+npm.cmd run build
+node --import tsx tests/browser/demo-smoke.mjs
+```
+
+By default, `demo-smoke.mjs` starts an isolated production server with temporary profiles/receipts and removes its runtime directory afterward. Set `SKILLRECEIPT_BROWSER_URL` to target an existing server instead.
+
+After building, run the dedicated camera checks:
+
+```powershell
+node tests/browser/session-smoke.mjs
+```
+
+`session-smoke.mjs` also starts an isolated production server by default. Set `SKILLRECEIPT_BROWSER_URL` only when targeting an existing server; that mode creates results under the test browser’s private cookie in that server’s store.
+
+Screenshots go to ignored `test-results/`. These scripts fail on uncaught page errors. They cover representative interactions and responsive layouts, not every assistive-technology or hardware combination.
