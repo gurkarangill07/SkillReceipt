@@ -1,4 +1,21 @@
-# Required-camera integrity revision ? November 8, 2026
+# Production deployment - November 8, 2026
+
+Live app: https://skillreceipt-nine.vercel.app/. This production record supersedes the earlier local-only entries below.
+
+- Existing Vercel project: `skillreceipt`, project ID `prj_YU5cX5DVY4fIaYM6rZ3gyYCC5RGT`, Node 24, existing private Blob storage retained.
+- Application release: `08c53a0` on `demo/resume-to-employer`, including camera/integrity feature commit `54844fb`.
+- Verified deployment: `dpl_3d5QmCCijziVJ2739dyb111TJSyg`, built with production settings and tested before promotion. Vercel confirms the main public URL points to that deployment with status Ready.
+- The first staged cloud check found session-update conflicts during fullscreen resume. Private JSON reads now request identity encoding to preserve strong ETags for conditional writes. All 105 unit tests and type checking pass with that change; the Vercel build succeeds.
+- The camera browser suite passes against both the staged production deployment and the final public domain: required camera/fullscreen, real detector with controlled video frames, paste blocking, tab/focus/fullscreen interruption, missing/multiple faces, covered camera, reconnect/resync, a 100-point engineering submission with preserved integrity events, permission denial and media cleanup.
+- The public homepage, start page, engineering/QA exercises, sales assessment, employer page, result list, model and WASM assets return 200. The public API rejects camera-less session starts with 400.
+- Existing publicly published candidate IDs, report scores and artifact fingerprints match between the old and new deployments. No existing reports were migrated or overwritten by this release.
+- Physical camera hardware and liveness remain outside the automated verification, as described in [PROCTORING.md](PROCTORING.md). Browser-test submissions remain private and do not add published candidates.
+
+The previous production deployment `dpl_4sgtMp8sJSq6ahQ96VtBxEEfEncf` remains available in Vercel for rollback. The rejected staged deployment was never assigned the public production domain.
+
+---
+
+# Required-camera integrity revision - November 8, 2026
 
 This section describes the current local changes on demo/resume-to-employer. Earlier records below are historical. Nothing was pushed or deployed.
 

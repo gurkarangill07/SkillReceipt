@@ -1,6 +1,6 @@
 # Local assessment integrity policy
 
-Revision: November 8, 2026. This revision is local only; it has not been pushed or deployed.
+Revision: November 8, 2026. Deployed to the existing SkillReceipt project at https://skillreceipt-nine.vercel.app/. Source branch: `demo/resume-to-employer`.
 
 ## Required checks
 

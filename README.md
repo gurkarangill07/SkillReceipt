@@ -2,6 +2,8 @@
 
 A resume lists skills. SkillReceipt gives job seekers a practical exercise and employers a report of the work behind the score.
 
+Live app: **https://skillreceipt-nine.vercel.app/**. Start from the homepage; use **Junior Data Engineer** for the featured camera and integrity demonstration. See the [judge walkthrough](docs/DEMO.md).
+
 ## Run locally
 
 Use Node 24 LTS:

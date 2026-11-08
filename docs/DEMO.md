@@ -1,10 +1,12 @@
 # Judge demo: a scored work sample with an integrity trail
 
-**Featured exercise: Junior Data Engineer — Reliable Orders Pipeline.** Open `/challenge/junior-data-engineer`. Allow 5–7 minutes, with a working webcam and a desktop browser that supports fullscreen. This revision is local only.
+**Live app:** https://skillreceipt-nine.vercel.app/.
+
+**Featured exercise: Junior Data Engineer — Reliable Orders Pipeline.** Start from the homepage, or open https://skillreceipt-nine.vercel.app/challenge/junior-data-engineer. Allow 5–7 minutes, with a working webcam and a desktop browser that supports fullscreen.
 
 ## Start locally
 
-Use Node 24. Dependencies are already installed in the development checkout; a fresh checkout needs `npm ci` once. Run `npm run dev` (`npm.cmd run dev` in Windows PowerShell), then open `http://localhost:3000/challenge/junior-data-engineer`.
+The existing workspace preview runs at http://localhost:3001/ because another application uses port 3000. For a fresh local session, use Node 24, install dependencies with `npm ci`, run `npm run dev` (`npm.cmd run dev` in Windows PowerShell), and open the Local URL printed by Next.js.
 
 Keep good lighting and rehearse with the actual webcam. Camera access is required. Do not select **View worked example** when demonstrating integrity: it deliberately creates an unmonitored, labeled example.
 
