@@ -1,14 +1,14 @@
 import "server-only";
 
-import { randomBytes, randomUUID } from "node:crypto";
-import { mkdir, readFile, readdir, rename, rm, writeFile } from "node:fs/promises";
+import { randomBytes } from "node:crypto";
 import path from "node:path";
 import type { ReceiptEvidence } from "../contracts";
 import type { CandidateProfile, CandidateReport, CandidateSearchResult } from "../people";
 import { ROLE_CATALOG } from "../career";
 import { getScenario } from "../scenarios";
 import { InputError, isRecord } from "../validation";
-import { FileReceiptRepository, validToken, type ReceiptRepository } from "./store";
+import { FileReceiptRepository, getRepository, validToken, type ReceiptRepository } from "./store";
+import { FileJsonDocuments, cloudStorageEnabled, newCloudDocuments, type JsonDocuments } from "./documents";
 
 type StoredCandidate = CandidateProfile & { ownerHash: string };
 export type CandidateSearchOptions = { q?: string; minScore?: number; includeExamples?: boolean };
@@ -71,36 +71,33 @@ export class PeopleRepository {
   readonly directory: string;
   readonly receipts: ReceiptRepository;
 
-  constructor(directory: string, receipts?: ReceiptRepository) {
+  readonly documents: JsonDocuments;
+
+  constructor(directory: string, receipts?: ReceiptRepository, documents?: JsonDocuments) {
     const root = path.resolve(directory);
     this.directory = path.join(root, "people");
     this.receipts = receipts ?? new FileReceiptRepository(root);
+    this.documents = documents ?? new FileJsonDocuments(this.directory);
   }
 
-  private async read(ownerHash: string): Promise<StoredCandidate | null> {
+  private async readVersioned(ownerHash: string): Promise<{ candidate: StoredCandidate; version: string } | null> {
     if (!validToken(ownerHash)) return null;
-    let value: unknown;
-    try { value = JSON.parse(await readFile(path.join(this.directory, `${ownerHash}.json`), "utf8")); }
-    catch (error) { if ((error as NodeJS.ErrnoException).code === "ENOENT") return null; throw error; }
+    const document = await this.documents.read(`${ownerHash}.json`);
+    if (!document) return null;
+    const value = document.value;
     if (!isRecord(value) || value.ownerHash !== ownerHash || typeof value.id !== "string" || !candidateId(value.id) || typeof value.visible !== "boolean" || typeof value.createdAt !== "string" || !Number.isFinite(Date.parse(value.createdAt))) throw new Error("Stored candidate is invalid.");
     let name: string, resume: CandidateProfile["resume"];
     try { name = profileName(value.name); resume = resumeSummary(value.resume); }
     catch { throw new Error("Stored candidate is invalid."); }
-    return { id: value.id, name, resume, visible: value.visible, createdAt: value.createdAt, ownerHash };
+    return { candidate: { id: value.id, name, resume, visible: value.visible, createdAt: value.createdAt, ownerHash }, version: document.version };
+  }
+
+  private async read(ownerHash: string): Promise<StoredCandidate | null> {
+    return (await this.readVersioned(ownerHash))?.candidate ?? null;
   }
 
   private async owners(): Promise<string[]> {
-    try { return (await readdir(this.directory)).filter((name) => name.endsWith(".json") && validToken(name.slice(0, -5))).map((name) => name.slice(0, -5)); }
-    catch (error) { if ((error as NodeJS.ErrnoException).code === "ENOENT") return []; throw error; }
-  }
-
-  private async write(candidate: StoredCandidate): Promise<void> {
-    await mkdir(this.directory, { recursive: true, mode: 0o700 });
-    const temporary = path.join(this.directory, `.${randomUUID()}.tmp`);
-    try {
-      await writeFile(temporary, JSON.stringify(candidate), { flag: "wx", mode: 0o600 });
-      await rename(temporary, path.join(this.directory, `${candidate.ownerHash}.json`));
-    } finally { await rm(temporary, { force: true }); }
+    return (await this.documents.list()).filter((name) => name.endsWith(".json") && validToken(name.slice(0, -5))).map((name) => name.slice(0, -5));
   }
 
   async getCandidateForOwner(ownerHash: string): Promise<CandidateProfile | null> {
@@ -113,14 +110,17 @@ export class PeopleRepository {
     if (!["name", "resume", "visible"].some((key) => key in input)) throw new InputError("Choose a profile change to save.");
     if (input.visible !== undefined && typeof input.visible !== "boolean") throw new InputError("Choose whether employers can find your profile.");
     return locked(this.directory, async () => {
-      const existing = await this.read(ownerHash);
-      const name = input.name === undefined && existing ? existing.name : profileName(input.name);
-      const resume = input.resume === undefined ? existing?.resume ?? null : resumeSummary(input.resume);
-      const visible = typeof input.visible === "boolean" ? input.visible : existing?.visible ?? false;
-      if (visible && !(await this.receipts.listOwner(ownerHash)).length) throw new InputError("Complete an exercise before making your profile visible to employers.");
-      const candidate: StoredCandidate = { id: existing?.id ?? `SR-${randomBytes(5).toString("hex").toUpperCase()}`, name, resume, visible, createdAt: existing?.createdAt ?? new Date().toISOString(), ownerHash };
-      await this.write(candidate);
-      return profileView(candidate);
+      for (let attempt = 0; attempt < 5; attempt++) {
+        const current = await this.readVersioned(ownerHash);
+        const existing = current?.candidate ?? null;
+        const name = input.name === undefined && existing ? existing.name : profileName(input.name);
+        const resume = input.resume === undefined ? existing?.resume ?? null : resumeSummary(input.resume);
+        const visible = typeof input.visible === "boolean" ? input.visible : existing?.visible ?? false;
+        if (visible && !(await this.receipts.listOwner(ownerHash)).length) throw new InputError("Complete an exercise before making your profile visible to employers.");
+        const candidate: StoredCandidate = { id: existing?.id ?? `SR-${randomBytes(5).toString("hex").toUpperCase()}`, name, resume, visible, createdAt: existing?.createdAt ?? new Date().toISOString(), ownerHash };
+        if (await this.documents.compareAndSet(`${ownerHash}.json`, candidate, current?.version ?? null)) return profileView(candidate);
+      }
+      throw new Error("The profile changed concurrently. Please retry.");
     });
   }
 
@@ -179,7 +179,8 @@ export class PeopleRepository {
 let singleton: PeopleRepository | undefined;
 export function getPeopleRepository(): PeopleRepository {
   const root = path.resolve(/*turbopackIgnore: true*/ process.env.SKILLRECEIPT_DATA_DIR ?? path.join(process.cwd(), ".data"));
-  if (!singleton || singleton.directory !== path.join(root, "people")) singleton = new PeopleRepository(root);
+  const kind = cloudStorageEnabled() ? "blob" : "file";
+  if (!singleton || singleton.directory !== path.join(root, "people") || singleton.documents.kind !== kind) singleton = new PeopleRepository(root, getRepository(), kind === "blob" ? newCloudDocuments("people") : undefined);
   return singleton;
 }
 export const getCandidateForOwner = (ownerHash: string) => getPeopleRepository().getCandidateForOwner(ownerHash);

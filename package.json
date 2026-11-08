@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "engines": {
-    "node": ">=22"
+    "node": "24.x"
   },
   "scripts": {
     "dev": "next dev",
@@ -14,6 +14,7 @@
     "test:e2e": "node scripts/run-tests.mjs integration"
   },
   "dependencies": {
+    "@vercel/blob": "2.8.2",
     "mammoth": "1.13.0",
     "next": "16.4.5",
     "quickjs-emscripten": "0.32.0",

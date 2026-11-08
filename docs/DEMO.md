@@ -25,4 +25,4 @@ If permission is unavailable, select **Practice without camera**. That attempt i
 
 Use **Browse all exercises** to show QA, Frontend, Product Analytics, Cybersecurity and Data Analysis. Product Analytics' worked example demonstrates 10% control conversion, 12.5% variant conversion, 2.5 percentage points of absolute increase and 25% relative uplift. All six work samples can be submitted and reviewed.
 
-Session observations are browser-reported context, not proof that cheating is impossible. Results are evidence about a specific task, not identity verification or certification. Local links require access to this server. Vercel deployment still needs durable shared storage.
+Session observations are browser-reported context, not proof that cheating is impossible. Results are evidence about a specific task, not identity verification or certification. Local links require access to this server. The Vercel version uses private persistent storage; local browser history does not automatically transfer to the hosted URL.

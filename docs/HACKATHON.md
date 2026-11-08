@@ -30,6 +30,6 @@ Reports include the actual submitted answers/code/data, published checks, score 
 
 Hiding a profile blocks fresh employer searches and report requests. Individual read-only receipt links are separately enabled/revoked. Downloaded or previously saved copies cannot be recalled. Browser ownership lasts 30 days; clearing its cookie removes private access. CSV/JSON downloads provide a portable copy.
 
-## Local hosting
+## Hosting
 
-The app uses ignored `.data/` files with single-process persistence. It is a functional local presentation build, not a deployed hiring service. Migrate profiles/receipts to durable shared storage before Vercel deployment. No deployment occurs in this revision.
+Local development uses ignored `.data/` files. Vercel uses private Blob JSON documents for profiles and receipts, configured through server-only `BLOB_READ_WRITE_TOKEN`. Reads bypass provider caches; conditional ETag writes prevent lost profile/sharing updates across functions. Deployment without its storage connection fails closed. Source uploads exclude local receipts, environment secrets and test artifacts. The runtime is pinned to Node24.

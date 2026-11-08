@@ -6,7 +6,7 @@ A résumé lists skills. SkillReceipt gives job seekers a practical exercise and
 
 ## Run locally
 
-Use Node 22 or a newer supported LTS:
+Use Node 24 LTS:
 
 ```sh
 npm ci
@@ -58,4 +58,6 @@ npm run test:e2e
 
 ## Hosting
 
-Profiles and receipts currently use ignored `.data/` files with one persistent server process. Durable shared storage must replace that store before Vercel deployment. This revision runs locally; it does not deploy the app. Historical account records remain protected, and login/registration are disabled.
+Local development stores profiles and receipts in ignored `.data/` files. Vercel deployments use a connected **private Vercel Blob store**, selected by the server-only `BLOB_READ_WRITE_TOKEN` environment variable. Cloud reads bypass the cache and updates use ETag conditions, so publication/link revocation is checked on fresh requests and concurrent updates cannot silently overwrite each other. Vercel fails closed if storage is missing. Local test data is excluded from deployment.
+
+Deployment settings are in `vercel.json`; connect a private Blob store to the linked Vercel project, then run `vercel --prod`. Never commit the storage token. Login/registration remain disabled; no account is required to use the app.

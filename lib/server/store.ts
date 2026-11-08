@@ -1,7 +1,6 @@
 import "server-only";
 
 import { createHash, randomBytes, randomUUID } from "node:crypto";
-import { mkdir, open, readFile, readdir, rename, rm } from "node:fs/promises";
 import path from "node:path";
 import { ASSESSMENT_VERSION, RUBRIC_VERSION } from "../assessment";
 import type { OwnerReceipt, ReceiptEvidence, ReceiptSummary, Submission } from "../contracts";
@@ -11,6 +10,7 @@ import { runCoding, storedCodingEvaluation } from "./coding";
 import { fingerprint } from "../fingerprint";
 import { isRecord, parseSubmission } from "../validation";
 import { SCENARIOS, evaluateScenario, scenarioVersions } from "../scenarios";
+import { FileJsonDocuments, cloudStorageEnabled, newCloudDocuments, type JsonDocuments } from "./documents";
 
 export const validId = (value: string) => /^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/.test(value) && value.length === 36;
 export const validToken = (value: string) => value.length === 64 && /^[a-f0-9]{64}$/.test(value);
@@ -48,14 +48,14 @@ const ownerView = (record: StoredReceipt): OwnerReceipt => ({ ...evidence(record
 
 export class FileReceiptRepository implements ReceiptRepository {
   readonly directory: string;
-  constructor(directory: string) { this.directory = path.resolve(directory); }
+  readonly documents: JsonDocuments;
+  constructor(directory: string, documents?: JsonDocuments) { this.directory = path.resolve(directory); this.documents = documents ?? new FileJsonDocuments(this.directory); }
 
-  private async read(id: string): Promise<StoredReceipt | null> {
+  private async readVersioned(id: string): Promise<{ record: StoredReceipt; version: string } | null> {
     if (!validId(id)) return null;
-    let raw: string;
-    try { raw = await readFile(path.join(this.directory, `${id}.json`), "utf8"); }
-    catch (error) { if ((error as NodeJS.ErrnoException).code === "ENOENT") return null; throw error; }
-    const parsed: unknown = JSON.parse(raw);
+    const document = await this.documents.read(`${id}.json`);
+    if (!document) return null;
+    const parsed = document.value;
     if (!isRecord(parsed) || parsed.id !== id || typeof parsed.ownerHash !== "string" || !validToken(parsed.ownerHash) ||
         (parsed.shareToken !== null && (typeof parsed.shareToken !== "string" || !validToken(parsed.shareToken))) ||
         ![ASSESSMENT_VERSION, PIPELINE_VERSION, CODING_VERSION, ...SCENARIOS.map((s) => `scenario-${s.id}-v1`)].includes(String(parsed.assessmentVersion)) || ![RUBRIC_VERSION, PIPELINE_RUBRIC_VERSION, CODING_RUBRIC_VERSION, "scenario-rules-v1"].includes(String(parsed.rubricVersion)) ||
@@ -74,34 +74,19 @@ export class FileReceiptRepository implements ReceiptRepository {
     const clean = submission.scenario ? evaluateScenario(submission.scenario) : submission.workSample?.kind === "data-engineer-v2" ? storedCodingEvaluation(submission.workSample, evaluation) : submission.workSample ? evaluatePipeline(submission.workSample) : evaluate(submission);
     // v1 evaluator is fixed. A corrupt record fails rather than being silently repaired.
     if (JSON.stringify(evaluation) !== JSON.stringify(clean) || parsed.fingerprint !== fingerprint(submission)) throw new Error("Stored evidence is inconsistent.");
-    return {
+    return { record: {
       id, ownerHash: parsed.ownerHash, shareToken: parsed.shareToken as string | null,
       createdAt: parsed.createdAt, ...versions,
       submission, evaluation: clean, fingerprint: parsed.fingerprint,
-    };
+    }, version: document.version };
   }
 
-  private async write(record: StoredReceipt): Promise<void> {
-    await mkdir(this.directory, { recursive: true, mode: 0o700 });
-    const destination = path.join(this.directory, `${record.id}.json`);
-    const temporary = path.join(this.directory, `.${record.id}.${randomUUID()}.tmp`);
-    let file;
-    try {
-      file = await open(temporary, "wx", 0o600);
-      await file.writeFile(JSON.stringify(record), "utf8");
-      await file.sync();
-      await file.close(); file = undefined;
-      await rename(temporary, destination);
-    } finally {
-      await file?.close();
-      await rm(temporary, { force: true });
-    }
+  private async read(id: string): Promise<StoredReceipt | null> {
+    return (await this.readVersioned(id))?.record ?? null;
   }
 
   private async ids(): Promise<string[]> {
-    try {
-      return (await readdir(this.directory)).filter((name) => name.endsWith(".json") && validId(name.slice(0, -5))).map((name) => name.slice(0, -5));
-    } catch (error) { if ((error as NodeJS.ErrnoException).code === "ENOENT") return []; throw error; }
+    return (await this.documents.list()).filter((name) => name.endsWith(".json") && validId(name.slice(0, -5))).map((name) => name.slice(0, -5));
   }
 
   async create(input: Submission, ownerHash: string): Promise<OwnerReceipt> {
@@ -113,7 +98,7 @@ export class FileReceiptRepository implements ReceiptRepository {
         ...(submission.scenario ? scenarioVersions(submission.scenario) : pipelineVersion(submission) ?? { assessmentVersion: ASSESSMENT_VERSION, rubricVersion: RUBRIC_VERSION }),
         submission, evaluation: submission.scenario ? evaluateScenario(submission.scenario) : submission.workSample?.kind === "data-engineer-v2" ? evaluateEngineer(submission.workSample, await runCoding(submission.workSample.code!)) : submission.workSample ? evaluatePipeline(submission.workSample) : evaluate(submission), fingerprint: fingerprint(submission),
       };
-      await this.write(record);
+      if (!await this.documents.compareAndSet(`${record.id}.json`, record, null)) throw new Error("A receipt with that ID already exists. Please retry.");
       return ownerView(record);
     });
   }
@@ -145,12 +130,15 @@ export class FileReceiptRepository implements ReceiptRepository {
   async setSharing(id: string, ownerHash: string, enabled: boolean): Promise<{ shareToken: string | null } | null> {
     if (!validId(id) || !validToken(ownerHash)) return null;
     return withLock(this.directory, async () => {
-      const record = await this.read(id);
-      if (!record || record.ownerHash !== ownerHash) return null;
-      // Enabling twice is idempotent. Re-enabling after revocation gets fresh entropy.
-      record.shareToken = enabled ? record.shareToken ?? randomBytes(32).toString("hex") : null;
-      await this.write(record);
-      return { shareToken: record.shareToken };
+      for (let attempt = 0; attempt < 5; attempt++) {
+        const current = await this.readVersioned(id);
+        if (!current || current.record.ownerHash !== ownerHash) return null;
+        const record = current.record;
+        // Conditional writes preserve idempotence even across server instances.
+        record.shareToken = enabled ? record.shareToken ?? randomBytes(32).toString("hex") : null;
+        if (await this.documents.compareAndSet(`${id}.json`, record, current.version)) return { shareToken: record.shareToken };
+      }
+      throw new Error("The receipt changed concurrently. Please retry.");
     });
   }
 
@@ -168,8 +156,8 @@ export class FileReceiptRepository implements ReceiptRepository {
 
 let singleton: FileReceiptRepository | undefined;
 export function getRepository(): ReceiptRepository {
-  // Runtime receipts are external mutable data and must not be bundled as source.
   const directory = path.resolve(/*turbopackIgnore: true*/ process.env.SKILLRECEIPT_DATA_DIR ?? path.join(process.cwd(), ".data"));
-  if (!singleton || singleton.directory !== directory) singleton = new FileReceiptRepository(directory);
+  const kind = cloudStorageEnabled() ? "blob" : "file";
+  if (!singleton || singleton.directory !== directory || singleton.documents.kind !== kind) singleton = new FileReceiptRepository(directory, kind === "blob" ? newCloudDocuments("receipts") : undefined);
   return singleton;
 }
