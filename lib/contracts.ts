@@ -1,10 +1,11 @@
 export type DataRow = { orderId: string; date: string; region: string; revenue: string };
 export type SalesCheckId = "unique" | "dates" | "regions" | "revenue" | "integrity" | "total";
 export type PipelineCheckId = "key" | "dedupe" | "missing" | "schema" | "load" | "partition";
-export type CheckId = SalesCheckId | PipelineCheckId | "coding";
-export type SessionContext = { mode: "camera" | "practice" | "presentation"; cameraStarted: boolean; tabSwitches: number; interruptions: number; activeSeconds: number };
+export type CheckId = SalesCheckId | PipelineCheckId | "coding" | `scenario-${string}`;
+export type SessionContext = { mode: "camera" | "practice" | "presentation"; cameraStarted: boolean; tabSwitches: number; interruptions: number; activeSeconds: number; focusLosses?: number; pasteEvents?: number; fullscreenExits?: number; fullscreenStarted?: boolean; sessionId?: string; integrity?: import("./proctoring").IntegrityAudit };
 export type PipelineWork = { kind: "data-pipeline-v1" | "data-engineer-v2"; answers: Record<"key" | "missing" | "load", string> & Partial<Record<"dedupe" | "schema" | "partition", string>>; session: SessionContext; code?: string };
-export type Submission = { rows: DataRow[]; total: string; displayName: string; reflection: string; demo: boolean; workSample?: PipelineWork };
+export type ScenarioWork = { kind: "scenario-v1"; roleId: string; answers: Record<string, string> };
+export type Submission = { rows: DataRow[]; total: string; displayName: string; reflection: string; demo: boolean; workSample?: PipelineWork; scenario?: ScenarioWork; session?: SessionContext };
 export type CheckResult = { id: CheckId; label: string; rule: string; pointsPossible: number; pointsEarned: number; passed: boolean; observations: string[] };
 export type Evaluation = {
   score: number;

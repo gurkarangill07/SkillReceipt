@@ -1,18 +1,45 @@
-# SkillReceipt: a simple three-minute demonstration
+# Judge demo: a scored work sample with an integrity trail
 
-**Pitch:** “Upload your résumé, choose a role, show a little real work, then share the evidence behind your score.”
+**Live app:** https://skillreceipt-nine.vercel.app/.
 
-Prepare one candidate account and a separate employer account using **Create an account** on the sign-in screen. Use different emails and passwords of at least ten characters. Use a synthetic résumé, not a real applicant's personal data. Accounts and results persist in this local installation; no accounts or passwords are shipped in source.
+**Featured exercise: Junior Data Engineer — Reliable Orders Pipeline.** Start from the homepage, or open https://skillreceipt-nine.vercel.app/challenge/junior-data-engineer. Allow 5–7 minutes, with a working webcam and a desktop browser that supports fullscreen.
 
-1. **Candidate workspace, 20 seconds.** Show the dark dashboard and stable Candidate ID. Select **Add résumé**, upload a short TXT/PDF/DOCX file, and explain that keywords provide context and never earn points. The sample résumé shortcut does not save a downloadable file; use an actual synthetic upload to demonstrate employer downloads.
-2. **Find a role, 20 seconds.** Continue to role search, type **Junior Data Engineer**, and open the assessment. There are two supported roles in this prototype.
-3. **A focused task, 40 seconds.** Show **Start my work sample**, select Practice, acknowledge the session conditions, and begin. Answer Order ID, Quarantine for review, and Upsert by the business key. Each question appears on its own, followed by a small JavaScript task. Show the example and **Run tests**. The starter function returns zero and passes two of four cases.
-4. **A useful result, 35 seconds.** Finish with the starter code to receive **80/100**: three decision checks pass and coding earns 20/40. Show the published tests and the candidate's concrete coding improvement plan. A new attempt with a correct loop earns 100; the **Demo helper** can load the example and keeps the attempt labeled demo.
-5. **Employer review, 40 seconds.** Return to the candidate dashboard, enable **Employer profile access**, and copy the Candidate ID. Sign out, select **For employers**, sign into the prepared employer account and search that ID. Show the résumé download, actual score and expandable check evidence. Private coaching and account email are excluded; any contact details in the résumé remain part of that file.
-6. **Candidate control, 15 seconds.** Explain that the candidate can disable profile access to block new lookups/downloads. Public receipt links have their own revoke controls. Scores describe a particular work sample; identity, employer organizations and independent authorship are not verified.
+## Start locally
 
-For a very short pitch, **Presenter demo · sample attempt** on the brief skips to review, uses no camera and yields the same 80-point improvement story. Its demo label remains visible in the result and employer evidence. The coding page is accessible through **Review my code**.
+The existing workspace preview runs at http://localhost:3001/ because another application uses port 3000. For a fresh local session, use Node 24, install dependencies with `npm ci`, run `npm run dev` (`npm.cmd run dev` in Windows PowerShell), and open the Local URL printed by Next.js.
 
-Camera mode uses an explicit permission button and a local preview. It counts only this page's visibility changes; it does not inspect other tabs or guarantee that someone cannot cheat. Rehearse hardware permission and return-from-hidden behavior on the presentation device before choosing camera mode. No Ollama setup is required for the deterministic results and improvement plan.
+Keep good lighting and rehearse with the actual webcam. Camera access is required. Do not select **View worked example** when demonstrating integrity: it deliberately creates an unmonitored, labeled example.
 
-Run `npm ci` then `npm run dev`, and open http://localhost:3000. If Turbopack's local compiler is restricted by the host, use `npm run dev -- --webpack`. For a built preview, use `npm run build -- --webpack` then `npm start`.
+## The story
+
+Northstar Retail imports daily checkout orders. The import may retry the same batch, one amount is unknown and a zero-value order is legitimate. The candidate makes three data-quality decisions, writes a revenue function, runs its tests and receives a reproducible score alongside a separate session integrity report.
+
+## Walkthrough
+
+1. **Show the detailed brief.** Explain the source feed, retry behavior, missing values and the four published coding cases. Optional: start from `/start`, add a name and sample resume, and show the relevant recommendation. Resume skills never earn assessment points.
+2. **Start work sample.** Point out the redesigned permission screen. Read the disclosure, tick consent and click **Enable camera**. Show the actual preview and **One face visible · checks active**. The begin button remains disabled without a working camera and a stable face. Click **Enter fullscreen & begin**.
+3. **Demonstrate a blocked action.** Attempt Ctrl+V/Cmd+V in a test input. The content is blocked; **Paste blocked** appears in the live timeline. Clipboard contents are never collected.
+4. **Show a tab or fullscreen interruption.** Switch tabs, or press Escape to leave fullscreen. Return to the assessment: it is paused, answer controls are disabled and the event is visible. Click **Resume test** to restore fullscreen and sync the session. Prior events remain in the report.
+5. **Show the actual camera check.** Move out of view for at least 3 seconds. The assessment pauses and logs **No face in view**. Move back, wait for one stable face and resume. If time allows, have a second person enter view or cover the camera. Demonstrate **Stop camera & pause**, then **Reconnect camera**, wait for the face check and resume. The system never silently switches to practice.
+6. **Complete the decisions.** Choose **Order ID**, **Quarantine for review** and **Upsert by the business key**. Each earns 20 points. The sidebar provides the source feed and distinguishes the retry policy from the coding calculation.
+7. **Type and run the code.** The clipboard is blocked, so type this short function rather than pasting it:
+
+   ```js
+   function totalRevenue(orders) {
+     let total = 0;
+     for (const order of orders) {
+       if (order.revenueCents !== null) total += order.revenueCents;
+     }
+     return total;
+   }
+   ```
+
+   Click **Run tests**. Show the ordinary-amount, empty-list, null and genuine-zero cases. Each passing case earns 10 points. Code executes in the existing isolated server-side VM. The timeline records the test run without logging keystrokes.
+8. **Review & finish**, then **Get my receipt**. Show the score, per-rule evidence, submitted code, **Camera assessment · integrity report**, review events, server check-ins and the complete timeline. The deliberate interruptions create **Review required** while a correct solution still scores 100. That separates demonstrated skill from observations requiring a conversation.
+9. **Review as an employer.** Optionally publish the candidate profile, open a separate employer window, search JavaScript and inspect the report. The actual work and integrity timeline remain visible; private ownership capabilities do not. Download JSON evidence to show server receipt timestamps. Revoke profile publication and refresh the employer search to show candidate control.
+
+## Explain precisely
+
+“We require a camera and fullscreen, run face-presence checks on the device, pause interrupted attempts and preserve an event trail for review. The skill score comes from the actual submitted work. The observations support authenticity review; they are not proof of identity or a guarantee that outside help was impossible.”
+
+No video or audio is recorded or uploaded. Face presence does not verify liveness or detect a photograph/replay. The browser cannot observe another device or every operating-system action. See [the full policy and limitations](PROCTORING.md).

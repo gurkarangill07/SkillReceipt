@@ -30,6 +30,25 @@ export class CookieClient {
   }
 }
 
+// HTTP tests report synthetic observations explicitly; browser tests run the real detector.
+export async function monitoredSubmission(client, input, kinds = []) {
+  const body = structuredClone(input);
+  if (body.demo || body.session?.mode === "presentation" || body.workSample?.session?.mode === "presentation") return body;
+  const state = { camera: true, fullscreen: true, focused: true, visible: true, detector: true, faces: 1, paused: false };
+  const exercise = body.scenario?.roleId ?? (body.workSample ? "junior-data-engineer" : "junior-data-analyst");
+  const start = await client.json("/api/assessment-sessions", { consent: true, exercise, state });
+  assert.equal(start.status, 201, await start.clone().text());
+  const { id } = await start.json();
+  if (kinds.length) {
+    const sent = await client.json(`/api/assessment-sessions/${id}`, { state, events: kinds.map((kind, index) => ({ seq: index + 1, kind, elapsedMs: 0 })) });
+    assert.equal(sent.status, 200, await sent.clone().text());
+  }
+  body.session = { mode: "camera", cameraStarted: true, fullscreenStarted: true, tabSwitches: 0, interruptions: 0, activeSeconds: 0, sessionId: id };
+  if (body.workSample) body.workSample.session = body.session;
+  body.sessionSequence = kinds.length;
+  return body;
+}
+
 export function assertPrivate(response) {
   assert.match(response.headers.get("cache-control") ?? "", /no-store/i);
 }
@@ -52,7 +71,7 @@ export function assertSafeEvidence(evidence, secrets = []) {
   const inspect = (value) => {
     if (!value || typeof value !== "object") return;
     for (const [key, child] of Object.entries(value)) {
-      assert.ok(!/^(owner|ownerHash|ownerToken|session|sessionToken|sessionHash|shareToken|advice|coaching)$/i.test(key), `Private field ${key}`);
+      assert.ok(!/^(owner|ownerHash|ownerToken|sessionId|sessionToken|sessionHash|shareToken|advice|coaching)$/i.test(key), `Private field ${key}`);
       inspect(child);
     }
   };

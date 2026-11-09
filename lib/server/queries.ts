@@ -5,13 +5,12 @@ import { unstable_noStore as noStore } from "next/cache";
 import type { OwnerReceipt, ReceiptEvidence, ReceiptSummary } from "../contracts";
 import { OWNER_COOKIE, ownerHashFromToken } from "./auth";
 import { getRepository } from "./store";
-import { ACCOUNT_COOKIE, getAccounts } from "./accounts";
+import { getAccounts } from "./accounts";
 
 async function currentOwnerHash() {
-  const jar = await cookies(); const session = jar.get(ACCOUNT_COOKIE)?.value;
-  if (session) return getAccounts().owner(session);
-  const legacy = ownerHashFromToken(jar.get(OWNER_COOKIE)?.value);
-  return legacy && !await getAccounts().requiresAccount(legacy) ? legacy : null;
+  const jar = await cookies();
+  const owner = ownerHashFromToken(jar.get(OWNER_COOKIE)?.value);
+  return owner && !await getAccounts().requiresAccount(owner) ? owner : null;
 }
 
 export async function getCurrentReceipts(): Promise<ReceiptSummary[]> {

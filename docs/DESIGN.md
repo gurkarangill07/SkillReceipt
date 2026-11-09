@@ -1,4 +1,4 @@
-> Current lead-requested dark portals, accounts, résumé sharing and coding scope: [DARK_PORTALS_SPEC.md](DARK_PORTALS_SPEC.md). The specification below records an earlier version.
+> Current lead-requested dark portals, accounts, resume sharing and coding scope: [DARK_PORTALS_SPEC.md](DARK_PORTALS_SPEC.md). The specification below records an earlier version.
 
 # SkillReceipt interface
 

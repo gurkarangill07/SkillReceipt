@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { CookieClient, expectError } from "../helpers/http-client.mjs";
+import { CookieClient, expectError, monitoredSubmission } from "../helpers/http-client.mjs";
 import { startIsolatedApp } from "../helpers/next-server.mjs";
 import { pdfFixture, docxFixture } from "../helpers/resume-fixtures";
 
@@ -45,7 +45,7 @@ test("résumé to role score and employer evidence", { timeout: 120_000 }, async
       const shared = await owner.json(`/api/receipts/${id}/share`, { enabled: true }); const { shareToken } = await shared.json();
       const response = await visitor.request(`/evidence/${shareToken}`); assert.equal(response.status, 200);
       const html = await response.text();
-      for (const expected of ["75", "Demo work sample", "Presentation demo", "CLIENT-REPORTED", "Schema validation"]) assert.ok(html.includes(expected), expected);
+      for (const expected of ["75", "Worked example", "Schema validation"]) assert.ok(html.includes(expected), expected);
       assert.ok(!html.includes("PRIVATE_APPLICANT") && !html.includes("Turn the gaps into a plan"));
       const evidence = await (await owner.request(`/api/receipts/${id}/download?format=json`)).json();
       assert.equal(evidence.fingerprint, fingerprint); assert.ok(!("id" in evidence) && !("shareToken" in evidence) && !("ownerHash" in evidence));
@@ -55,10 +55,10 @@ test("résumé to role score and employer evidence", { timeout: 120_000 }, async
     await t.test("realistic correct attempt scores 100; camera metrics cannot change score or artifact fingerprint", async () => {
       const correct = structuredClone(input); correct.workSample.answers.schema = "strict"; correct.workSample.answers.partition = "order_date";
       correct.workSample.session.mode = "practice";
-      const first = await (await owner.json("/api/receipts", correct)).json();
+      const first = await (await owner.json("/api/receipts", await monitoredSubmission(owner, correct))).json();
       assert.equal(first.evaluation.score, 100);
       const secondInput = structuredClone(correct); secondInput.workSample.session.tabSwitches = 4;
-      const second = await (await owner.json("/api/receipts", secondInput)).json();
+      const second = await (await owner.json("/api/receipts", await monitoredSubmission(owner, secondInput, ["tab_hidden"])) ).json();
       assert.equal(second.evaluation.score, 100); assert.equal(second.fingerprint, first.fingerprint);
       assert.notEqual(second.id, first.id);
     });

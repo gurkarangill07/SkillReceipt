@@ -1,3 +1,95 @@
+# Production deployment - November 8, 2026
+
+Live app: https://skillreceipt-nine.vercel.app/. This production record supersedes the earlier local-only entries below.
+
+- Existing Vercel project: `skillreceipt`, project ID `prj_YU5cX5DVY4fIaYM6rZ3gyYCC5RGT`, Node 24, existing private Blob storage retained.
+- Application release: `08c53a0` on `demo/resume-to-employer`, including camera/integrity feature commit `54844fb`.
+- Verified deployment: `dpl_3d5QmCCijziVJ2739dyb111TJSyg`, built with production settings and tested before promotion. Vercel confirms the main public URL points to that deployment with status Ready.
+- The first staged cloud check found session-update conflicts during fullscreen resume. Private JSON reads now request identity encoding to preserve strong ETags for conditional writes. All 105 unit tests and type checking pass with that change; the Vercel build succeeds.
+- The camera browser suite passes against both the staged production deployment and the final public domain: required camera/fullscreen, real detector with controlled video frames, paste blocking, tab/focus/fullscreen interruption, missing/multiple faces, covered camera, reconnect/resync, a 100-point engineering submission with preserved integrity events, permission denial and media cleanup.
+- The public homepage, start page, engineering/QA exercises, sales assessment, employer page, result list, model and WASM assets return 200. The public API rejects camera-less session starts with 400.
+- Existing publicly published candidate IDs, report scores and artifact fingerprints match between the old and new deployments. No existing reports were migrated or overwritten by this release.
+- Physical camera hardware and liveness remain outside the automated verification, as described in [PROCTORING.md](PROCTORING.md). Browser-test submissions remain private and do not add published candidates.
+
+The previous production deployment `dpl_4sgtMp8sJSq6ahQ96VtBxEEfEncf` remains available in Vercel for rollback. The rejected staged deployment was never assigned the public production domain.
+
+---
+
+# Required-camera integrity revision - November 8, 2026
+
+This section describes the current local changes on demo/resume-to-employer. Earlier records below are historical. Nothing was pushed or deployed.
+
+## Verification completed
+
+- Type checking passed; the final production build passed.
+- Unit tests: **105 passed, 0 failed**, including the new owner/exercise-bound audit, event sequence/replay validation, stale-check-in detection, immutable sealed logs, receipt retry idempotence and session-ID exclusion.
+- HTTP integration: **32 passed, 0 failed** against isolated production servers. Normal submissions without monitoring, denied preflight conditions, mismatched owners, unsynced/paused sessions and changed receipt replays are rejected. Existing scoring, private ownership, exports, publication/search/revocation and process-restart persistence pass.
+- Camera Chromium suite passed using the real MediaPipe face detector on controlled NASA portrait canvas streams. Verified desktop and 375 px setup layouts, no access before consent, mandatory camera/fullscreen, paste blocking, injected tab/focus events, fullscreen-exit pause, sustained absent/multiple faces, covered camera, camera stop/reconnect, offline resync, a real scored engineering submission, preserved incidents, denied-permission blocking, media release after submission and late permission resolution after leaving.
+- Candidate-to-employer Chromium suite passed: real resume text upload, recommendations, monitored QA attempt scoring 90, profile publication, employer detailed report, privacy/share/revocation, all six worked examples, and desktop/mobile layouts. No uncaught page errors.
+- Visually inspected the actual camera setup screenshots at desktop and phone sizes. Captures are in ignored test-results/; camera-setup-desktop.png, camera-setup-mobile.png and integrity-receipt.png show the revised flow.
+- Diff whitespace check passed.
+
+## Verification limits
+
+Media is controlled test data, not the PC's physical webcam. Headless tab/focus conditions are injected where browser tab activation does not change visibility. Real hardware, lighting variations, gaze, liveness, virtual-camera detection and exhaustive accessibility are not verified. Face presence can be satisfied by a photograph/replay. The browser can report false observations if modified; the server verifies ownership, ordering, receipt timing and report persistence rather than authenticating the sensor. No video, audio, screenshots, raw keystrokes, clipboard contents or browsing history is retained.
+
+Use [DEMO.md](DEMO.md) for the judge rehearsal and [PROCTORING.md](PROCTORING.md) for policy and limits. The featured exercise is Junior Data Engineer ? Reliable Orders Pipeline. A worked example is deliberately unmonitored and must not be used to demonstrate the live integrity checks.
+
+---
+
+# resume-to-employer revision — November 7, 2026
+
+This record describes the current app. Earlier guest-catalog and account-portal results below are historical.
+
+## Verification completed
+
+- Type checking passed.
+- Unit tests: **95 passed, 0 failed**.
+- Production build: passed.
+- Real HTTP integration: **31 passed, 0 failed**, including the new resume/profile → assessed work → employer publication/search/report → revocation journey, owner isolation and process-restart persistence.
+- Full Chromium production browser journey: actual TXT upload and keyword extraction; resume-based ranking; six-exercise browsing and empty search; consented simulated-camera QA attempt scoring 90/100; feedback; candidate opt-in; employer skill search and detailed report; private-plan exclusion; separate-context public link; link and directory revocation. All six worked examples submitted successfully. Desktop and 390px mobile layouts had no horizontal overflow or uncaught page errors.
+- Dedicated camera production browser checks: consent before access; video-only constraints with no audio track; rendered preview with nonzero video width; tab/focus pause and answer blocking; resume; paste count without clipboard data; camera mute and reconnect; fullscreen-exit pause; camera cleanup after submission/navigation; denied-permission practice fallback; and late permission resolution after navigation.
+- Visually inspected the actual desktop resume form, employer report, camera screen and phone resume form. Screenshots are in ignored `test-results/`.
+- Diff whitespace check: passed.
+
+## Evidence and scope
+
+Camera tests use Chromium's fake video device and simulated permission/focus events where needed. They do not verify the PC's physical camera or establish independent authorship. The UI reports observations rather than a cheating verdict, and never calls the result a certification.
+
+No raw resume bytes/text, video, audio or clipboard contents are persisted. Candidate profile publication starts private. Public reports include actual assessed work and disclosed session context, while private receipt capabilities and owner secrets remain excluded. Example answers are requested explicitly and the normal UI preserves their label; this local, anonymous prototype is not resistant to a determined caller altering requests or browser-reported signals.
+
+The app remains local, with a single-process file repository. Durable shared storage is required before a Vercel deployment. No deployment is claimed.
+
+---
+
+## Earlier revisions
+
+# Guest hackathon revision — November 7, 2026
+
+Current product scope: [HACKATHON.md](HACKATHON.md). Older portal/account records below are historical and do not describe the current interface.
+
+## Verified in this workspace
+
+- `npm run typecheck`: passed.
+- `npm test`: **81 passed, 0 failed**, including every new domain's full and partial scores, invalid input, versioned persistence, fingerprints, owner separation, sharing and revocation.
+- `npm run build`: passed with the committed dependency lockfile and installed Node 24.
+- `npm run test:e2e`: **24 passed, 0 failed** against real isolated Next production servers. Covers unauthenticated challenge pages, disabled registration/login, actual JavaScript execution, server-owned scoring, scenario owner/shared pages, CSV/JSON exports, access control, revocation and process-restart persistence. Existing sales, parser and compatibility-coach checks also pass.
+- Playwright/Chromium desktop and mobile smoke: passed across all six challenge types. Verified catalog filtering, an actual imperfect QA attempt (90), all four scenario examples (100), engineering example (80), sales example (100), public share in a separate browser context, revocation, source-material visibility on mobile and no page-level horizontal overflow. No uncaught page errors.
+- Visually inspected desktop home/catalog and mobile Product Analytics exercise screenshots. Captures are under ignored `test-results/`.
+- `git diff --check`: passed.
+
+## Fixes found during verification
+
+The Windows HTTP harness now skips `.next/dev` and cache files, dereferences build-time dependency links, and uses a junction for the temporary server's node_modules. Product fixes include preserving source visibility on phone layouts, removing old sign-in instructions from unavailable receipts, and consistent role titles in shared views.
+
+## Remaining scope
+
+The app is local and uses a single-process file store. Durable shared storage is still required before Vercel deployment. Browser smoke is not an exhaustive accessibility audit. Real camera/proctoring checks are irrelevant to this revision because that interface has been removed. No public deployment is claimed.
+
+---
+
+## Historical validation records
+
 # Dark portals and coding revision: actual validation
 
 Date: November 7, 2026. Local branch `feat/dark-portals-coding`, based on `d9b5662`. Scope: [DARK_PORTALS_SPEC.md](DARK_PORTALS_SPEC.md). This section supersedes earlier status below.
@@ -11,7 +103,7 @@ Date: November 7, 2026. Local branch `feat/dark-portals-coding`, based on `d9b56
 - `npm run test:e2e`: exit 0 with the normal parallel runner. **19 nested HTTP scenarios passed** across three real production-server suites; Node reports **22 tests** including parents. Temporary directories and independent cookie jars are used.
 - `git diff --check`: clean.
 
-New account checks cover salted password hashes, hashed/expiring/revoked sessions, stable candidate IDs and ownership after login, duplicate/wrong-role rejection, one-account ownership binding, candidate-only uploads, employer-only lookup, private defaults, explicit opt-in and résumé access revocation. HTTP checks additionally exercise same-origin rejection, protected workspaces, forbidden employer submissions, private résumé persistence/download, excluded ownership/account secrets, real restart/login recovery, and denial with revoked account cookies or an old ownership cookie alone.
+New account checks cover salted password hashes, hashed/expiring/revoked sessions, stable candidate IDs and ownership after login, duplicate/wrong-role rejection, one-account ownership binding, candidate-only uploads, employer-only lookup, private defaults, explicit opt-in and resume access revocation. HTTP checks additionally exercise same-origin rejection, protected workspaces, forbidden employer submissions, private resume persistence/download, excluded ownership/account secrets, real restart/login recovery, and denial with revoked account cookies or an old ownership cookie alone.
 
 Coding checks execute the actual QuickJS WASM VM: reference function passes all four cases; starter returns zero and passes two; malformed code, wrong return types, unavailable host/network APIs, infinite loops and memory growth fail within limits. Three correct decisions plus starter code score **80**, a correct implementation scores **100**, and code changes alter the artifact fingerprint. Only the three asked decisions and actual code appear in the new receipt/export; unasked decisions are excluded. New records reopen without re-executing user code. Original pipeline and sales scoring/serialization/share behavior remains covered.
 
@@ -19,7 +111,7 @@ During acceptance, an intermittent timeout appeared in the oversized chunked-upl
 
 ## Browser observation and limits
 
-Native Brave loaded the isolated production preview on port 3216 using synthetic candidate/employer fixtures and a synthetic résumé. Screenshots were inspected for the dark candidate sign-in and candidate dashboard. Existing-account sign-in succeeded and the dashboard showed the correct candidate ID, résumé controls, 80-point demo record and profile-access state. No default accounts or passwords are shipped in the application. Synthetic preview storage was removed and the owned preview server stopped.
+Native Brave loaded the isolated production preview on port 3216 using synthetic candidate/employer fixtures and a synthetic resume. Screenshots were inspected for the dark candidate sign-in and candidate dashboard. Existing-account sign-in succeeded and the dashboard showed the correct candidate ID, resume controls, 80-point demo record and profile-access state. No default accounts or passwords are shipped in the application. Synthetic preview storage was removed and the owned preview server stopped.
 
 The browser-access host was unavailable. Native control was interrupted by user activity and then timed out during challenge navigation. Full question/code interaction, employer search interaction, keyboard/focus checks, console inspection, 390 px layout and physical camera/visibility/track-stop behavior are **not** claimed as browser-verified. Their API/scoring/authorization paths are covered by the real-server tests. No local screenshot files were created.
 
@@ -31,24 +123,24 @@ This remains a local prototype with self-registered employer accounts, no email 
 
 # Role-led demo revision: actual validation
 
-This section supersedes the previous integrated baseline's status below. The work is on local branch `feat/role-assessment-demo`, based on `254f554`. The lead requested résumé upload, job-role selection, a practical test, session monitoring and a clear score/improvement experience. See [DEMO_V2_SPEC.md](DEMO_V2_SPEC.md) for the revised scope.
+This section supersedes the previous integrated baseline's status below. The work is on local branch `feat/role-assessment-demo`, based on `254f554`. The lead requested resume upload, job-role selection, a practical test, session monitoring and a clear score/improvement experience. See [DEMO_V2_SPEC.md](DEMO_V2_SPEC.md) for the revised scope.
 
 ## Checks actually completed
 
 `npm ci`, `npm run typecheck`, `npm test`, `npm run build`, and `npm run test:e2e` all exited **0** after the new packages/features were integrated. Installation reported zero npm audit findings at that time.
 
-- **64 unit tests passed**, zero failed/skipped/cancelled: the original 55 plus nine new résumé/pipeline cases.
+- **64 unit tests passed**, zero failed/skipped/cancelled: the original 55 plus nine new resume/pipeline cases.
 - **14 HTTP scenarios passed** across two real-server suites; Node reports **16 tests** including the two parent cases. Zero failed/skipped/cancelled.
 - Production build compiled all routes, including `/start`, `/challenge/junior-data-engineer` and `/api/resume`.
 - New tests perform actual PDF and DOCX text extraction from tiny synthetic in-memory documents, plus TXT parsing. They verify that only filename/skill keywords are returned, raw personal text is absent, and upload creates no receipt. Unsupported/mismatched/oversized documents are rejected.
 - The pipeline's reference configuration scores **100**. Each incorrect choice loses exactly its published points. The presentation example scores **75**, with schema and partitioning failed. The simulator exercises latest-vs-first updates, missing values and duplicate-on-append replay.
-- Pipeline receipts persist under their own versions, retain server-authoritative scoring despite forged client claims, enforce owner isolation, render private practice steps, export actual configuration and support independent employer sharing/revocation. Employer evidence contains session context but no résumé or private practice plan.
+- Pipeline receipts persist under their own versions, retain server-authoritative scoring despite forged client claims, enforce owner isolation, render private practice steps, export actual configuration and support independent employer sharing/revocation. Employer evidence contains session context but no resume or private practice plan.
 - Camera/tab counts and mode do not change score/fingerprint. Presentation mode is forcibly labeled demo. Invalid session fields/counters and unsupported answer values are rejected. Pipeline coach requests use role-specific fixed rules, not legacy R008 cleaning guidance; mocked advice never changes the 75-point receipt.
 - Original sales rubric, canonical money handling, old receipt serialization, ownership, exports, sharing, coach failures and real restart persistence remain covered and passed.
 
 ## Browser and device observation
 
-A production preview ran on loopback port 3215 with isolated temporary storage. Native Brave loaded the new `/start` page. Actual clicks on **Use a sample résumé** and **Choose my role** succeeded. Accessibility snapshots showed the sample label and SQL/Python/ETL keywords, the résumé-does-not-score explanation, the four-step journey, search input and both supported role cards. Camera access was not requested during QA.
+A production preview ran on loopback port 3215 with isolated temporary storage. Native Brave loaded the new `/start` page. Actual clicks on **Use a sample resume** and **Choose my role** succeeded. Accessibility snapshots showed the sample label and SQL/Python/ETL keywords, the resume-does-not-score explanation, the four-step journey, search input and both supported role cards. Camera access was not requested during QA.
 
 Further navigation attempts were interrupted by native browser control reporting that the user changed the app; no complete interactive/mobile pass is claimed. Physical camera permissions/preview, visibility pause/resume, stopping tracks, full six-question keyboard interaction and mobile visual layout still need a manual device rehearsal. These features are implemented but not hardware-verified here. No recording, audio capture or tab-content access is implemented. No screenshots from this revision are claimed.
 
@@ -56,7 +148,7 @@ The separate native-browser observation from the older baseline below is histori
 
 ## Remaining product limits
 
-Only the two listed roles are supported. The Engineer sample tests six configuration decisions rather than every industry skill, live SQL/Python or a production cloud pipeline. Résumé detection is bounded keyword matching, not verified qualifications or a comprehensive résumé assessment. Camera/visibility data is client-reported and cannot prove independent authorship or prevent other-device assistance. Local PDF/DOCX parsing needs resource-isolated workers/rate limits and further hostile-document hardening before public production use. Nothing was deployed or automatically pushed by this local feature task.
+Only the two listed roles are supported. The Engineer sample tests six configuration decisions rather than every industry skill, live SQL/Python or a production cloud pipeline. resume detection is bounded keyword matching, not verified qualifications or a comprehensive resume assessment. Camera/visibility data is client-reported and cannot prove independent authorship or prevent other-device assistance. Local PDF/DOCX parsing needs resource-isolated workers/rate limits and further hostile-document hardening before public production use. Nothing was deployed or automatically pushed by this local feature task.
 
 ---
 
