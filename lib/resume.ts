@@ -3,7 +3,8 @@ import { InputError } from "./validation";
 export const RESUME_LIMIT = 2 * 1024 * 1024;
 export const RESUME_SKILLS = ["SQL", "Python", "Excel", "Power BI", "Tableau", "Spark", "Airflow", "dbt", "ETL", "Data modeling", "PostgreSQL", "AWS", "JavaScript", "React", "HTML", "CSS", "TypeScript", "Accessibility", "Testing", "QA", "Jest", "Cypress", "Playwright", "Product analytics", "A/B testing", "Data analysis", "Cybersecurity", "Incident response", "Phishing", "Security", "Networks"] as const;
 export function detectResumeSkills(text: string): string[] {
-  return RESUME_SKILLS.filter((skill) => new RegExp(`\\b${skill.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "i").test(text));
+  const normalizedText = text.replace(/\s+/g, " ");
+  return RESUME_SKILLS.filter((skill) => new RegExp(`\\b${skill.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "i").test(normalizedText));
 }
 
 export async function readResumeBytes(request: Request): Promise<Uint8Array> {

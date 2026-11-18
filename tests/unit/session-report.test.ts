@@ -135,6 +135,16 @@ test("resume recommendations use actual frontend, QA and security keywords; unkn
   assert.equal(recommendExercises(["react", "HTML"])[0].id, "frontend-developer");
 });
 
+test("résumé recommendations recognize skill phrases with line breaks and nonbreaking spaces", () => {
+  const skills = detectResumeSkills("Product\r\nanalytics, A/B\u00a0testing, and Data\tanalysis");
+
+  assert.deepEqual(skills, ["Testing", "Product analytics", "A/B testing", "Data analysis"]);
+  const [top] = recommendExercises(skills);
+  assert.equal(top.id, "product-analyst");
+  assert.deepEqual(top.matchedSkills, ["Product analytics", "A/B testing", "Data analysis"]);
+  assert.deepEqual(detectResumeSkills("Product\nanalyst, Power\u00a0BIOS"), []);
+});
+
 test("worked-example endpoints disclose examples and return usable scenario answers without changing normal client payloads", async () => {
   for (const scenario of SCENARIOS) {
     const request = new NextRequest(`http://localhost:3000/api/challenges/${scenario.id}/example`, { method: "POST", headers: { Origin: "http://localhost:3000", "Content-Type": "application/json" }, body: "{}" });
